@@ -271,28 +271,21 @@ body.scrolled .main-content {
     margin-bottom: 4rem;
 }
 
-.collage-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    height: 100vh;
-    gap: 0.5rem;
-}
-
-.collage-item {
+.hero-video-wrapper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    position: relative;
+    z-index: 0;
 }
 
-.collage-item.large {
-    grid-row: span 2;
-}
-
-.collage-item img {
+.hero-video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.8;
+    opacity: 0.75;
+    display: block;
 }
 
 /* Content Sections */
