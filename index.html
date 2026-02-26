@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap"
         rel="stylesheet">
 
     <!-- Chart.js -->
@@ -26,7 +26,7 @@
     <header id="dynamic-header" class="header-container">
         <div class="header-inner">
             <div class="branding">
-                <div class="logo">Synth<span>Forensics</span></div>
+                <div class="logo">SynthForensics</div>
                 <p class="tagline">A Multi-Generator Benchmark for Detecting Synthetic Video Deepfakes</p>
             </div>
 
@@ -35,11 +35,11 @@
                     <li><a href="#hero-visual">Overview</a></li>
                     <li><a href="#news">News</a></li>
                     <li><a href="#abstract">Abstract</a></li>
-                    <li><a href="#dataset-stats">Dataset Statistics</a></li>
+                    <li><a href="#pipeline">Pipeline</a></li>
+                    <li><a href="#dataset-stats">Dataset Stats & Results</a></li>
                     <li><a href="#t2v-models">T2V Models</a></li>
-                    <li><a href="#key-findings">Key Findings</a></li>
-                    <li><a href="#benchmark-results">Benchmark Results</a></li>
-                    <li><a href="#pipeline">Construction Pipeline</a></li>
+                    <li><a href="#dataset">Dataset</a></li>
+                    <li><a href="#download">Download</a></li>
                     <li><a href="#team">The Team</a></li>
                     <li><a href="#citation">Citation</a></li>
                 </ul>
@@ -48,7 +48,7 @@
             <div class="header-footer">
                 <div class="external-links">
                     <a href="https://arxiv.org/abs/2602.04939" title="ArXiv Paper">📄 Paper</a>
-                    <a href="#" title="Dataset Link">💾 Data</a>
+                    <a href="#download" title="Dataset Link">💾 Data</a>
                     <a href="#" title="GitHub Repo">💻 Code</a>
                 </div>
                 <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">
@@ -81,7 +81,19 @@
                     <source src="assets/50VIDS.mp4" type="video/mp4">
                 </video>
             </div>
-            <div class="hero-spacer"></div>
+            <div class="hero-overlay">
+                <div class="hero-text-block">
+                    <h1 class="hero-title">SynthForensics</h1>
+                    <p class="hero-subtitle">A Multi-Generator Benchmark for Detecting<br>Synthetic Video Deepfakes</p>
+                    <div class="hero-cta">
+                        <a href="https://arxiv.org/abs/2602.04939" class="hero-btn hero-btn-secondary"
+                            target="_blank">📄 Read Paper</a>
+                        <a href="#download" class="hero-btn hero-btn-secondary hero-scroll-btn">💾 Download Dataset</a>
+                        <span class="hero-btn hero-btn-secondary hero-btn-disabled" title="Code coming soon">💻 Code
+                            <small>(coming soon)</small></span>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- News -->
@@ -100,7 +112,26 @@
         <section id="abstract" class="content-section reveal shadow-bg">
             <div class="container-fluid">
                 <h2 class="section-title">Abstract</h2>
-                <div class="abstract-content">
+                <!-- Paper title and authors -->
+                <div class="paper-info reveal-left">
+                    <h3 class="paper-title">
+                        <a href="https://arxiv.org/abs/2602.04939" target="_blank">
+                            SynthForensics: A Multi-Generator Benchmark for Detecting Synthetic Video Deepfakes
+                        </a>
+                    </h3>
+                    <p class="paper-authors">
+                        Roberto Leotta<sup>*</sup>,
+                        Salvatore Alfio Sambataro<sup>*</sup>,
+                        Claudio Vittorio Ragaglia,
+                        Mirko Casu,
+                        Yuri Petralia,
+                        Francesco Guarnera,
+                        Luca Guarnera,
+                        Sebastiano Battiato
+                    </p>
+                    <p class="paper-note"><sup>*</sup> Equal contribution</p>
+                </div>
+                <div class="abstract-content reveal-right">
                     <p>The landscape of synthetic media has been irrevocably altered by text-to-video (T2V) models,
                         whose outputs are rapidly approaching indistinguishability from reality. Critically, this
                         technology is no longer confined to large-scale labs; the proliferation of efficient,
@@ -138,175 +169,14 @@
             </div>
         </section>
 
-        <!-- Dataset Statistics -->
-        <section id="dataset-stats" class="content-section reveal">
-            <div class="container-fluid">
-                <h2 class="section-title">Dataset Statistics</h2>
-                <div class="key-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">6,815</span>
-                        <span class="stat-label">Unique Synthetic Videos</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">27,260</span>
-                        <span class="stat-label">Total Video Files</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">~550,000</span>
-                        <span class="stat-label">Total Frames</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">~9.5h</span>
-                        <span class="stat-label">Total Duration</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">5</span>
-                        <span class="stat-label">Different Aspect Ratios</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">4</span>
-                        <span class="stat-label"> Versions per video </span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">480&times;832 &mdash; 1280&times;720</span>
-                        <span class="stat-label">Resolution Range</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">8&ndash;24 FPS</span>
-                        <span class="stat-label">Frame Rate Range</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">4&ndash;6s</span>
-                        <span class="stat-label">Duration Range</span>
-                    </div>
-                </div>
-                <div class="charts-grid charts-single" style="margin-top: 2.5rem;">
-                    <div class="chart-container card">
-                        <h3>Generator Distribution</h3>
-                        <canvas id="generatorChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- T2V Models -->
-        <section id="t2v-models" class="content-section reveal shadow-bg">
-            <div class="container-fluid">
-                <h2 class="section-title">Text-to-Video Models</h2>
-                <p class="section-subtitle">The benchmark uses five state-of-the-art open-source T2V generators with
-                    diverse architectures.</p>
-                <div class="models-grid">
-                    <div class="model-card card">
-                        <div class="model-logo">
-                            <img src="assets/wan_logo.png" alt="Wan2.1 Logo">
-                        </div>
-                        <h3>Wan2.1</h3>
-                        <p class="model-params">14B parameters</p>
-                        <p>High-fidelity video generation with advanced temporal consistency.</p>
-                        <a href="https://github.com/Wan-Video/Wan2.1" class="model-link" target="_blank">View on GitHub
-                            →</a>
-                    </div>
-                    <div class="model-card card">
-                        <div class="model-logo">
-                            <img src="assets/Cog_logo.svg" alt="CogVideoX Logo">
-                        </div>
-                        <h3>CogVideoX</h3>
-                        <p class="model-params">5B parameters</p>
-                        <p>Efficient transformer-based architecture for realistic video synthesis.</p>
-                        <a href="https://github.com/THUDM/CogVideo" class="model-link" target="_blank">View on GitHub
-                            →</a>
-                    </div>
-                    <div class="model-card card">
-                        <div class="model-logo">
-                            <img src="assets/sky_logo.png" alt="SkyReels-V2 Logo">
-                        </div>
-                        <h3>SkyReels-V2</h3>
-                        <p class="model-params">14B parameters</p>
-                        <p>Cinematic quality video generation optimized for narrative content.</p>
-                        <a href="https://github.com/SkyworkAI/SkyReels" class="model-link" target="_blank">View on
-                            GitHub →</a>
-                    </div>
-                    <div class="model-card card">
-                        <div class="model-logo model-logo-placeholder">
-                            <span>SF</span>
-                        </div>
-                        <h3>Self-Forcing</h3>
-                        <p class="model-params">1.3B parameters</p>
-                        <p>Compact architecture with novel attention mechanisms for efficiency.</p>
-                        <a href="https://github.com/TIGER-AI-Lab/ConsisID" class="model-link" target="_blank">View on
-                            GitHub →</a>
-                    </div>
-                    <div class="model-card card">
-                        <div class="model-logo">
-                            <img src="assets/magi_logo.png" alt="MAGI-1 Logo">
-                        </div>
-                        <h3>MAGI-1</h3>
-                        <p class="model-params">24B parameters</p>
-                        <p>Largest model with exceptional photorealistic quality and motion realism.</p>
-                        <a href="https://github.com/Stability-AI/generative-models" class="model-link"
-                            target="_blank">View on GitHub →</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Key Findings -->
-        <section id="key-findings" class="content-section reveal">
-            <div class="container-fluid">
-                <h2 class="section-title">Key Findings</h2>
-                <div class="findings-grid">
-                    <div class="finding-card card">
-                        <h3>Catastrophic Performance Gap</h3>
-                        <p>Mean <strong>29.19% AUC drop</strong> when transitioning from manipulation-based to purely
-                            synthetic content.</p>
-                    </div>
-                    <div class="finding-card card">
-                        <h3>Compression Fragility</h3>
-                        <p>Top models lose <strong>30+ AUC points</strong> under heavy compression (CRF40).</p>
-                    </div>
-                    <div class="finding-card card">
-                        <h3>Forward Generalization</h3>
-                        <p>Models trained on SynthForensics achieve <strong>93.81% AUC</strong> on unseen generators.
-                        </p>
-                    </div>
-                    <div class="finding-card card">
-                        <h3>Backward Incompatibility</h3>
-                        <p>Complete failure (<strong>56.11% AUC</strong>) on legacy manipulation-based benchmarks after
-                            training on synthetic data.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Benchmark Results -->
-        <section id="benchmark-results" class="content-section reveal">
-            <div class="container-fluid">
-                <h2 class="section-title">Benchmark Results</h2>
-                <p class="section-subtitle">Comprehensive evaluation of 9 state-of-the-art deepfake detectors across
-                    multiple scenarios. (* Frame level detectors)</p>
-                <div class="chart-full card" style="margin-top: 2rem;">
-                    <h3>Zero-Shot Performance on SynthForensics (AUC %)</h3>
-                    <canvas id="zeroShotChart"></canvas>
-                </div>
-                <div class="chart-full card" style="margin-top: 2rem;">
-                    <h3>Fine-Tuning Results (AUC %)</h3>
-                    <canvas id="fineTuningChart"></canvas>
-                </div>
-                <div class="chart-full card" style="margin-top: 2rem;">
-                    <h3>Generalization to Unseen Generators (AUC %)</h3>
-                    <canvas id="generalizationChart"></canvas>
-                </div>
-            </div>
-        </section>
-
         <!-- Construction Pipeline -->
-        <section id="pipeline" class="content-section reveal shadow-bg">
+        <section id="pipeline" class="content-section reveal">
             <div class="container-fluid">
                 <h2 class="section-title">Construction Pipeline</h2>
                 <div class="pipeline-image">
                     <img src="assets/pipeline.jpg" alt="SynthForensics Dataset Construction Pipeline">
                 </div>
-                <div class="pipeline-narrative">
+                <div class="pipeline-narrative reveal-left">
                     <p class="pipeline-intro">
                         The SynthForensics benchmark was constructed through a rigorous multi-stage pipeline designed to
                         ensure
@@ -400,8 +270,312 @@
             </div>
         </section>
 
+        <!-- Dataset Statistics & Benchmark Results -->
+        <section id="dataset-stats" class="content-section reveal shadow-bg">
+            <div class="container-fluid">
+                <h2 class="section-title">Dataset Statistics &amp; Benchmark Results</h2>
+
+                <!-- Key Stats -->
+                <div class="key-stats reveal-scale">
+                    <div class="stat-item">
+                        <span class="stat-number">6,815</span>
+                        <span class="stat-label">Unique Synthetic Videos</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">27,260</span>
+                        <span class="stat-label">Total Video Files</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">~550,000</span>
+                        <span class="stat-label">Total Frames</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">~9.5h</span>
+                        <span class="stat-label">Total Duration</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">2,732</span>
+                        <span class="stat-label">Landscape Videos (16:9, 5:3)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">4,083</span>
+                        <span class="stat-label">Portrait Videos (3:4, 9:16, 3:5)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">480&times;832 &mdash; 1280&times;720</span>
+                        <span class="stat-label">Resolution Range</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">8&ndash;24 FPS</span>
+                        <span class="stat-label">Frame Rate Range</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">4&ndash;6s</span>
+                        <span class="stat-label">Duration Range</span>
+                    </div>
+                </div>
+
+                <!-- Benchmark Results -->
+                <h3 class="subsection-title" style="margin-top: 4rem;">Benchmark Results</h3>
+                <p class="section-subtitle">Comprehensive evaluation of 9 state-of-the-art deepfake detectors across
+                    multiple scenarios. (* Frame level detectors)</p>
+
+                <div class="chart-full card" style="margin-top: 2rem;">
+                    <h3>Zero-Shot Performance on SynthForensics (AUC %)</h3>
+                    <canvas id="zeroShotChart"></canvas>
+                </div>
+                <div class="chart-full card" style="margin-top: 2rem;">
+                    <h3>Fine-Tuning Results (AUC %)</h3>
+                    <canvas id="fineTuningChart"></canvas>
+                </div>
+                <div class="chart-full card" style="margin-top: 2rem;">
+                    <h3>Generalization to Unseen Generators (AUC %)</h3>
+                    <canvas id="generalizationChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- T2V Models -->
+        <section id="t2v-models" class="content-section reveal">
+            <div class="container-fluid">
+                <h2 class="section-title">Text-to-Video Models</h2>
+                <p class="section-subtitle">The benchmark uses five state-of-the-art open-source T2V generators with
+                    diverse architectures.</p>
+                <div class="models-grid">
+                    <div class="model-card card">
+                        <div class="model-logo">
+                            <img src="assets/wan_logo.png" alt="Wan2.1 Logo">
+                        </div>
+                        <h3>Wan2.1</h3>
+                        <p class="model-params">14B parameters</p>
+                        <p>High-fidelity video generation with advanced temporal consistency.</p>
+                        <a href="https://github.com/Wan-Video/Wan2.1/tree/325cfd41e64639cf26d76f2b60601384909934cb"
+                            class="model-link" target="_blank">View on GitHub →</a>
+                    </div>
+                    <div class="model-card card">
+                        <div class="model-logo">
+                            <img src="assets/Cog_logo.svg" alt="CogVideoX Logo">
+                        </div>
+                        <h3>CogVideoX</h3>
+                        <p class="model-params">5B parameters</p>
+                        <p>Efficient transformer-based architecture for realistic video synthesis.</p>
+                        <a href="https://github.com/zai-org/CogVideo/tree/5ab1e2449ffc8887ffad3ca3b9efd22ad7e356f7"
+                            class="model-link" target="_blank">View on GitHub →</a>
+                    </div>
+                    <div class="model-card card">
+                        <div class="model-logo">
+                            <img src="assets/sky_logo.png" alt="SkyReels-V2 Logo">
+                        </div>
+                        <h3>SkyReels-V2</h3>
+                        <p class="model-params">14B parameters</p>
+                        <p>Cinematic quality video generation optimized for narrative content.</p>
+                        <a href="https://github.com/SkyworkAI/SkyReels-V2/tree/0790f89b91981a37ce1fdb0a76e7f10ffc8b9903"
+                            class="model-link" target="_blank">View on GitHub →</a>
+                    </div>
+                    <div class="model-card card">
+                        <div class="model-logo model-logo-placeholder">
+                            <span>SF</span>
+                        </div>
+                        <h3>Self-Forcing</h3>
+                        <p class="model-params">1.3B parameters</p>
+                        <p>Compact architecture with novel attention mechanisms for efficiency.</p>
+                        <a href="https://github.com/guandeh17/Self-Forcing/tree/eb36b56aca91528bf5f1dcf36395e5c7151071e2"
+                            class="model-link" target="_blank">View on GitHub →</a>
+                    </div>
+                    <div class="model-card card">
+                        <div class="model-logo">
+                            <img src="assets/magi_logo.png" alt="MAGI-1 Logo">
+                        </div>
+                        <h3>MAGI-1</h3>
+                        <p class="model-params">24B parameters</p>
+                        <p>Largest model with exceptional photorealistic quality and motion realism.</p>
+                        <a href="https://github.com/SandAI-org/MAGI-1/tree/e7eeccf126f9294e7e119a90d1a57b9979faad36"
+                            class="model-link" target="_blank">View on GitHub →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dataset Section -->
+        <section id="dataset" class="content-section reveal shadow-bg">
+            <div class="container-fluid">
+                <h2 class="section-title">Dataset</h2>
+
+                <!-- Dataset Structure -->
+                <div class="dataset-subsection">
+                    <h3 class="subsection-title">📁 Dataset Structure</h3>
+                    <p class="section-subtitle">The benchmark is organized into metadata and video directories, with
+                        four compression variants per video.</p>
+                    <pre class="dir-tree"><code>SynthForensics/
+├── metadata/
+│   ├── cogvideox/
+│   │   ├── 000_cogvideox.json
+│   │   └── ...
+│   ├── magi-1/
+│   ├── self-forcing/
+│   ├── skyreels-v2/
+│   └── wan2-1/
+│
+└── videos/
+    ├── canonical/          ← Lossless re-encoding (H.264 CRF=0)
+    │   ├── cogvideox/
+    │   ├── magi-1/
+    │   ├── self-forcing/
+    │   ├── skyreels-v2/
+    │   └── wan2-1/
+    ├── crf23/              ← Light compression
+    │   └── ...
+    ├── crf40/              ← Heavy compression
+    │   └── ...
+    └── raw/                ← Direct generator output
+        └── ...</code></pre>
+                </div>
+
+                <!-- Dataset Splits -->
+                <div class="dataset-subsection">
+                    <h3 class="subsection-title">🔀 Dataset Splits</h3>
+                    <p>The dataset is divided into three standard splits provided as JSON files:</p>
+                    <ul class="dataset-splits-list">
+                        <li><code>splits/train.json</code></li>
+                        <li><code>splits/val.json</code></li>
+                        <li><code>splits/test.json</code></li>
+                    </ul>
+                    <div class="info-box">
+                        <strong>Split Protocol:</strong> The dataset follows the official FaceForensics++ split
+                        assignment. Each source video ID determines the split membership for all its corresponding
+                        synthetic versions across all five generators and all four compression variants. This ensures
+                        synthetic videos from the same real source remain in the same split, preventing data leakage and
+                        enabling fair generalization evaluation.
+                    </div>
+                </div>
+
+                <!-- Dataset Metadata -->
+                <div class="dataset-subsection">
+                    <h3 class="subsection-title">🗂️ Dataset Metadata</h3>
+                    <p>Each video is accompanied by structured metadata for reproducibility and artifact analysis:</p>
+                    <div class="metadata-grid">
+                        <div class="metadata-field">
+                            <span class="field-name">filename</span>
+                            <span class="field-desc">Name of the video file</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">width / height</span>
+                            <span class="field-desc">Video dimensions in pixels</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">video_length</span>
+                            <span class="field-desc">Duration in frames</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">fps</span>
+                            <span class="field-desc">Frame rate (frames per second)</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">prompt</span>
+                            <span class="field-desc">Detailed textual description used for generation</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">negative_prompt</span>
+                            <span class="field-desc">Keywords to suppress unwanted artifacts</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">cfg</span>
+                            <span class="field-desc">Classifier-Free Guidance scale</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">sample_steps</span>
+                            <span class="field-desc">Number of sampling steps</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">sample_shift</span>
+                            <span class="field-desc">Additional sampling shift parameter</span>
+                        </div>
+                        <div class="metadata-field">
+                            <span class="field-name">seed</span>
+                            <span class="field-desc">Random seed for reproducibility</span>
+                        </div>
+                    </div>
+
+                    <!-- Example JSON -->
+                    <h4 class="subsubsection-title">Example Metadata Entry</h4>
+                    <div class="citation-container card" style="margin-top: 1rem;">
+                        <pre><code id="metadata-example">{
+  "filename": "01__hugging_happy_first5sec",
+  "width": 832,
+  "height": 480,
+  "video_length": 81,
+  "fps": 16,
+  "cfg": 5.0,
+  "sample_shift": 5.0,
+  "sample_steps": 50,
+  "seed": 5944222960940485854,
+  "prompt": "The video has a candid and informal style, capturing a spontaneous moment between two individuals...",
+  "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕..."
+}</code></pre>
+                        <button class="copy-btn" onclick="copyMetadata()">Copy JSON</button>
+                    </div>
+                </div>
+
+                <!-- Version Descriptions -->
+                <div class="dataset-subsection">
+                    <h3 class="subsection-title">🗜️ Compression Variants</h3>
+                    <p>Each video is provided in four versions to enable real-world robustness testing:</p>
+                    <div class="versions-grid">
+                        <div class="version-card card">
+                            <div class="version-badge badge-raw">Raw</div>
+                            <p>Direct, unprocessed generator output. Preserves all original generation artifacts.</p>
+                        </div>
+                        <div class="version-card card">
+                            <div class="version-badge badge-canonical">Canonical</div>
+                            <p>Lossless re-encoding (H.264 CRF=0, YUV420p, BT.709) with uniform parameters across all
+                                generators.</p>
+                        </div>
+                        <div class="version-card card">
+                            <div class="version-badge badge-crf23">CRF23</div>
+                            <p>Light compression simulating standard online platform distribution.</p>
+                        </div>
+                        <div class="version-card card">
+                            <div class="version-badge badge-crf40">CRF40</div>
+                            <p>Heavy compression simulating aggressive distribution and social media scenarios.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Download -->
+        <section id="download" class="content-section reveal">
+            <div class="container-fluid">
+                <h2 class="section-title">Download</h2>
+                <p class="section-subtitle">The complete SynthForensics benchmark will be made available through the
+                    following access methods.</p>
+
+                <div class="download-notice">
+                    <span class="download-notice-icon">🔔</span>
+                    <p>Dataset access methods are currently being finalized. Sign up for notifications or check back
+                        soon.</p>
+                </div>
+
+                <div class="download-placeholder-grid">
+                    <div class="download-placeholder-card card">
+                        <div class="placeholder-icon">📦</div>
+                        <h3>Download Method A</h3>
+                        <p class="placeholder-desc">Access method details to be announced.</p>
+                        <span class="coming-soon-badge">Coming Soon</span>
+                    </div>
+                    <div class="download-placeholder-card card">
+                        <div class="placeholder-icon">🔗</div>
+                        <h3>Download Method B</h3>
+                        <p class="placeholder-desc">Access method details to be announced.</p>
+                        <span class="coming-soon-badge">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- The Team -->
-        <section id="team" class="content-section reveal">
+        <section id="team" class="content-section reveal shadow-bg">
             <div class="container-fluid">
                 <h2 class="section-title">The Team</h2>
                 <div class="team-grid">
@@ -451,7 +625,7 @@
         </section>
 
         <!-- Citation -->
-        <section id="citation" class="content-section reveal shadow-bg">
+        <section id="citation" class="content-section reveal">
             <div class="container-fluid">
                 <h2 class="section-title">Citation</h2>
                 <div class="citation-container card">
@@ -470,7 +644,8 @@
         </section>
 
         <footer class="main-footer">
-            <p>&copy; 2026 SynthForensics — MIT License. Contact: roberto.leotta@ictlab.srl</p>
+            <p>&copy; 2026 SynthForensics — CC BY-NC 4.0 (Dataset) · MIT License (Code). Contact:
+                roberto.leotta@ictlab.srl</p>
         </footer>
     </main>
 
