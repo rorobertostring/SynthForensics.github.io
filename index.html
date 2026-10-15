@@ -1,655 +1,763 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SynthForensics | Multi-Generator Benchmark for Detecting Synthetic Video Deepfakes</title>
+    <title>SynthForensics | Benchmarking and Evaluating People-Centric Synthetic Video Deepfakes</title>
     <meta name="description"
-        content="SynthForensics: The first human-centric benchmark for detecting purely synthetic video deepfakes from modern Text-to-Video models.">
+        content="SynthForensics (NeurIPS 2026): a people-centric benchmark of 20,445 purely synthetic videos from 8 text-to-video and 7 image-to-video open-source generators.">
+    <meta property="og:title" content="SynthForensics · NeurIPS 2026">
+    <meta property="og:description"
+        content="A people-centric benchmark for detecting purely synthetic video deepfakes.">
+    <meta property="og:image" content="assets/wall_poster.jpg">
+    <meta name="theme-color" content="#0a0a0b">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- CSS -->
+    <script>
+        // Apply the saved theme before first paint
+        try {
+            const t = localStorage.getItem('sf-theme');
+            if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        } catch (e) { }
+    </script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="light-mode init-page">
-    <header id="dynamic-header" class="header-container">
-        <div class="header-inner">
-            <div class="branding">
-                <div class="logo">SynthForensics</div>
-                <p class="tagline">A Multi-Generator Benchmark for Detecting Synthetic Video Deepfakes</p>
-            </div>
+<body class="is-intro">
+    <!-- Brand: starts as the hero title, flies into the sidebar on scroll -->
+    <a class="brand" href="#overview" aria-label="SynthForensics, back to top">SynthForensics</a>
 
-            <nav class="navigation">
-                <ul>
-                    <li><a href="#hero-visual">Overview</a></li>
-                    <li><a href="#news">News</a></li>
+    <!-- Sidebar (desktop) -->
+    <aside class="sidebar" aria-label="Page sections">
+        <div class="sidebar-inner">
+            <div class="brand-slot" aria-hidden="true">SynthForensics</div>
+            <p class="sidebar-tagline">Benchmarking and Evaluating People-Centric Synthetic Video Deepfakes</p>
+            <nav class="sidenav">
+                <span class="sidenav-indicator" aria-hidden="true"></span>
+                <ol>
                     <li><a href="#abstract">Abstract</a></li>
+                    <li><a href="#updates">Updates</a></li>
+                    <li><a href="#protocol">Paired protocol</a></li>
                     <li><a href="#pipeline">Pipeline</a></li>
-                    <li><a href="#dataset-stats">Dataset Stats & Results</a></li>
-                    <li><a href="#t2v-models">T2V Models</a></li>
-                    <li><a href="#dataset">Dataset</a></li>
+                    <li><a href="#generators">Generators</a></li>
+                    <li><a href="#realism">Quality and Realism Assessment</a></li>
+                    <li><a href="#results">Detection Results</a></li>
+                    <li><a href="#dataset">Structure &amp; Metadata</a></li>
                     <li><a href="#download">Download</a></li>
-                    <li><a href="#team">The Team</a></li>
+                    <li><a href="#team">Team</a></li>
                     <li><a href="#citation">Citation</a></li>
-                </ul>
+                </ol>
             </nav>
-
-            <div class="header-footer">
-                <div class="external-links">
-                    <a href="https://arxiv.org/abs/2602.04939" title="ArXiv Paper">📄 Paper</a>
-                    <a href="#download" title="Dataset Link">💾 Data</a>
-                    <a href="#" title="GitHub Repo">💻 Code</a>
+            <div class="sidebar-foot">
+                <div class="sidebar-links">
+                    <a href="https://huggingface.co/datasets/SynthForensics/SynthForensics" target="_blank"
+                        rel="noopener"><span class="btn-emoji" aria-hidden="true">🤗</span>Dataset</a>
+                    <a href="https://arxiv.org/abs/2602.04939" target="_blank" rel="noopener"><span class="btn-emoji"
+                            aria-hidden="true">📄</span>Paper</a>
+                    <a href="https://github.com/rorobertostring/Synthforensics" target="_blank" rel="noopener"><svg
+                            class="btn-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>Code</a>
                 </div>
-                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">
-                    <span class="theme-toggle-content">
-                        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="5"></circle>
-                            <line x1="12" y1="1" x2="12" y2="3"></line>
-                            <line x1="12" y1="21" x2="12" y2="23"></line>
-                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                            <line x1="1" y1="12" x2="3" y2="12"></line>
-                            <line x1="21" y1="12" x2="23" y2="12"></line>
-                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                        </svg>
-                        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                        </svg>
-                        <span class="theme-label">Theme</span>
-                    </span>
+                <button class="theme-toggle" type="button" aria-label="Switch color theme">
+                    <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4.5"></circle>
+                        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4">
+                        </path>
+                    </svg>
+                    <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7z"></path>
+                    </svg>
+                    <span class="theme-label">Theme</span>
                 </button>
             </div>
         </div>
+    </aside>
+
+    <!-- Top bar (mobile) -->
+    <header class="topbar">
+        <div class="brand-slot-mobile" aria-hidden="true">SynthForensics</div>
+        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-menu">
+            <span></span><span></span><span class="sr-only">Menu</span>
+        </button>
     </header>
+    <div class="mobile-menu" id="mobile-menu" hidden>
+        <nav>
+            <a href="#abstract">Abstract</a><a href="#updates">Updates</a><a href="#protocol">Paired protocol</a><a href="#pipeline">Pipeline</a>
+            <a href="#generators">Generators</a><a href="#realism">Quality and Realism Assessment</a><a href="#results">Detection Results</a>
+            <a href="#dataset">Structure &amp; Metadata</a><a href="#download">Download</a><a href="#team">Team</a><a
+                href="#citation">Citation</a>
+        </nav>
+    </div>
 
-    <main class="main-content">
-        <section id="hero-visual" class="hero-section">
-            <div class="hero-video-wrapper">
-                <video class="hero-video" autoplay muted loop playsinline>
-                    <source src="assets/50VIDS.mp4" type="video/mp4">
-                </video>
-            </div>
-            <div class="hero-overlay">
-                <div class="hero-text-block">
-                    <h1 class="hero-title">SynthForensics</h1>
-                    <p class="hero-subtitle">A Multi-Generator Benchmark for Detecting<br>Synthetic Video Deepfakes</p>
+    <main>
+        <!-- ============ HERO ============ -->
+        <section class="hero" id="overview" aria-label="Overview">
+            <div class="hero-stage">
+                <div class="wall" aria-hidden="true">
+                    <video class="wall-video" src="assets/50VIDS_loop.mp4" poster="assets/wall_poster.jpg" autoplay muted
+                        loop playsinline></video>
+                    <div class="wall-grid"></div>
+                </div>
+                <div class="hero-shade" aria-hidden="true"></div>
+
+                <div class="hero-copy">
+                    <p class="hero-venue"><span class="dot"></span>NeurIPS 2026 · Evaluations &amp; Datasets Track</p>
+                    <h1 class="hero-title"><span class="brand-hero-slot">SynthForensics</span></h1>
+                    <p class="hero-sub">Benchmarking and Evaluating<br>People-Centric Synthetic Video Deepfakes</p>
                     <div class="hero-cta">
-                        <a href="https://arxiv.org/abs/2602.04939" class="hero-btn hero-btn-secondary"
-                            target="_blank">📄 Read Paper</a>
-                        <a href="#download" class="hero-btn hero-btn-secondary hero-scroll-btn">💾 Download Dataset</a>
-                        <span class="hero-btn hero-btn-secondary hero-btn-disabled" title="Code coming soon">💻 Code
-                            <small>(coming soon)</small></span>
+                        <a class="btn btn-light" href="https://huggingface.co/datasets/SynthForensics/SynthForensics"
+                            target="_blank" rel="noopener"><span class="btn-emoji" aria-hidden="true">🤗</span>Download dataset</a>
+                        <a class="btn btn-glass" href="https://arxiv.org/abs/2602.04939" target="_blank"
+                            rel="noopener"><span class="btn-emoji" aria-hidden="true">📄</span>Read the paper</a>
+                        <a class="btn btn-glass" href="https://github.com/rorobertostring/Synthforensics" target="_blank"
+                            rel="noopener"><svg class="btn-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>Code</a>
                     </div>
                 </div>
+
+                <div class="hero-reveal" aria-live="polite">
+                    <p class="reveal-big"><span>None</span> <span>of</span> <span>these</span> <span>people</span>
+                        <span>exist.</span></p>
+                    <p class="reveal-small">Every face on this wall was generated by an open-source video model.
+                        SynthForensics collects 20,445 of them, each paired with the real video it was described from.
+                    </p>
+                </div>
+
+                <div class="scroll-cue" aria-hidden="true"><span></span>Scroll</div>
             </div>
         </section>
 
-        <!-- News -->
-        <section id="news" class="content-section reveal">
-            <div class="container-fluid">
-                <h2 class="section-title">News</h2>
-                <ul class="news-list">
-                    <li><span class="news-date">11 Feb 2026</span>: SynthForensics dataset and code released.</li>
-                    <li><span class="news-date">4 Feb 2026</span>: ArXiv preprint available — <a
-                            href="https://arxiv.org/abs/2602.04939">arXiv:2602.04939</a>.</li>
-                </ul>
-            </div>
-        </section>
+        <div class="content">
+            <!-- ============ ABSTRACT ============ -->
+            <section class="block" id="abstract">
+                <div class="wrap">
+                    <p class="eyebrow">NeurIPS 2026 · Evaluations &amp; Datasets Track</p>
+                    <h2 class="paper-title">SynthForensics: Benchmarking and Evaluating People-Centric Synthetic Video
+                        Deepfakes</h2>
+                    <p class="authors">
+                        <span>Roberto Leotta<sup>1*</sup></span>
+                        <span>Salvatore Alfio Sambataro<sup>2*</sup></span>
+                        <span>Claudio Vittorio Ragaglia<sup>2</sup></span>
+                        <span>Mirko Casu<sup>2</sup></span>
+                        <span class="authors-break" aria-hidden="true"></span>
+                        <span>Yuri Petralia<sup>1</sup></span>
+                        <span>Francesco Guarnera<sup>2</sup></span>
+                        <span>Luca Guarnera<sup>2</sup></span>
+                        <span>Sebastiano Battiato<sup>2</sup></span>
+                    </p>
+                    <p class="affil"><sup>1</sup>iCTLab s.r.l. &nbsp;·&nbsp; <sup>2</sup>University of Catania
+                        &nbsp;·&nbsp; <sup>*</sup>Equal contribution</p>
 
-        <!-- Abstract -->
-        <section id="abstract" class="content-section reveal shadow-bg">
-            <div class="container-fluid">
-                <h2 class="section-title">Abstract</h2>
-                <!-- Paper title and authors -->
-                <div class="paper-info reveal-left">
-                    <h3 class="paper-title">
-                        <a href="https://arxiv.org/abs/2602.04939" target="_blank">
-                            SynthForensics: A Multi-Generator Benchmark for Detecting Synthetic Video Deepfakes
+                    <p class="abstract-text" data-highlight>Modern T2V/I2V generators synthesize people increasingly
+                        hard to distinguish from authentic footage, while current evaluation suites lag: legacy
+                        benchmarks target manipulation-based forgeries, and recent synthetic-video benchmarks
+                        prioritize scale over realistic human depiction. We introduce SynthForensics, a people-centric
+                        benchmark of <strong>20,445 videos</strong> from <strong>8 T2V and 7 I2V</strong> open-source generators, paired-source from
+                        FF++/DFD reals, two-stage human-validated, in four compression versions with full metadata. In
+                        our paired-comparison human study, raters prefer SynthForensics in <strong>71–77%</strong> of head-to-head
+                        comparisons against each of nine existing synthetic-video benchmarks, while facial-quality
+                        metrics fall within the FF++/DFD baseline range. Across 15 detectors and three protocols,
+                        face-based methods drop <strong>13–55 AUC points</strong> (mean 27) from FF++ to SynthForensics and <strong>a further 23</strong>
+                        under aggressive compression; fine-tuning closes the gap at a backward cost on legacy
+                        benchmarks; re-training shows synthetic and manipulation features largely disjoint for most
+                        detectors. We release dataset, pipeline, and code.</p>
+
+                    <div class="stats">
+                        <div class="stat"><span class="stat-num" data-count="20445">20,445</span><span
+                                class="stat-label">unique synthetic videos</span></div>
+                        <div class="stat"><span class="stat-num"><span data-count="8">8</span> + <span
+                                    data-count="7">7</span></span><span class="stat-label">T2V + I2V
+                                generators</span></div>
+                        <div class="stat"><span class="stat-num" data-count="81780">81,780</span><span
+                                class="stat-label">video files, 4 compression levels</span></div>
+                        <div class="stat"><span class="stat-num"><span data-count="1.93" data-decimals="2">1.93</span>M</span><span
+                                class="stat-label">unique frames</span></div>
+                        <div class="stat"><span class="stat-num"><span data-count="27.2" data-decimals="1">27.2</span>
+                                h</span><span class="stat-label">of footage</span></div>
+                        <div class="stat"><span class="stat-num" data-count="15">15</span><span
+                                class="stat-label">detectors benchmarked</span></div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ============ UPDATES ============ -->
+            <section class="updates" id="updates">
+                <div class="wrap">
+                    <div class="upd-panel">
+                        <div class="upd-now">
+                            <h2 class="section-title" data-split>Updates</h2>
+                            <article class="upd-live">
+                                <span class="upd-status"><i class="dot"></i>In progress</span>
+                                <h3>SynthForensics v1.1</h3>
+                                <p>We are working on the next release, which adds videos from two more generators.</p>
+                                <ul class="upd-chips">
+                                    <li>Wan2.2</li>
+                                    <li>MiniMax H3</li>
+                                </ul>
+                            </article>
+                        </div>
+                        <ol class="upd-log">
+                            <li><time>Sep 2026</time>
+                                <div><b>Accepted at NeurIPS 2026</b><span>Evaluations &amp; Datasets Track. The full
+                                        dataset is on <a href="https://huggingface.co/datasets/SynthForensics/SynthForensics"
+                                            target="_blank" rel="noopener">Hugging Face</a>.</span></div>
+                            </li>
+                            <li><time>May 2026</time>
+                                <div><b>Extended paper (v2)</b><span>On <a href="https://arxiv.org/abs/2602.04939v2"
+                                            target="_blank" rel="noopener">arXiv</a>: 20,445 videos from 8 T2V and 7 I2V
+                                        generators, a human realism study and 15 detectors.</span></div>
+                            </li>
+                            <li><time>Feb 2026</time>
+                                <div><b>First preprint (v1)</b><span>On <a href="https://arxiv.org/abs/2602.04939v1"
+                                            target="_blank" rel="noopener">arXiv</a>.</span></div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ PAIRED PROTOCOL (pinned, scroll-driven) ============ -->
+            <section class="protocol" id="protocol">
+                <div class="protocol-pin">
+                    <div class="wrap protocol-grid">
+                        <div class="p-text">
+                            <h2 class="section-title" data-split>Every synthetic video has a real twin.</h2>
+                            <ol class="p-steps">
+                                <li class="is-active"><span class="p-n">01</span>
+                                    <div>
+                                        <h3>Start from a real video</h3>
+                                        <p>1,363 pristine clips from FaceForensics++ and DeepFake Detection anchor the
+                                            benchmark and fix its train, val and test splits.</p>
+                                    </div>
+                                </li>
+                                <li><span class="p-n">02</span>
+                                    <div>
+                                        <h3>Describe it in eight fields</h3>
+                                        <p>VideoLLaMA 3 writes a structured caption. Annotators and an LLM screen it
+                                            field by field before it is used.</p>
+                                    </div>
+                                </li>
+                                <li><span class="p-n">03</span>
+                                    <div>
+                                        <h3>Generate it with every model</h3>
+                                        <p>The same caption becomes the prompt for 8 text-to-video generators. Seven
+                                            image-to-video models also start from a reference frame.</p>
+                                    </div>
+                                </li>
+                                <li><span class="p-n">04</span>
+                                    <div>
+                                        <h3>Same content, different generator</h3>
+                                        <p>Scene, subject and action stay fixed, so a detector has to learn generation
+                                            artifacts instead of content.</p>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                        <div class="p-stage-wrap">
+                            <div class="p-stage" aria-hidden="true">
+                                <div class="p-card" style="left: 0px; top: 10px" data-x="0" data-y="10"><img src="assets/frames/t_wan.jpg" alt="" loading="lazy"><span class="p-tag">Synthetic</span><span class="p-label">Wan2.1</span></div>
+                                <div class="p-card" style="left: 220px; top: 10px" data-x="220" data-y="10"><img src="assets/frames/t_sky.jpg" alt="" loading="lazy"><span class="p-tag">Synthetic</span><span class="p-label">SkyReels-V2</span></div>
+                                <div class="p-card" style="left: 440px; top: 10px" data-x="440" data-y="10"><img src="assets/frames/t_self.jpg" alt="" loading="lazy"><span class="p-tag">Synthetic</span><span class="p-label">Self-Forcing</span></div>
+                                <div class="p-card" style="left: 440px; top: 180px" data-x="440" data-y="180"><img src="assets/frames/t_cog.jpg" alt="" loading="lazy"><span class="p-tag">Synthetic</span><span class="p-label">CogVideoX</span></div>
+                                <div class="p-card" style="left: 440px; top: 350px" data-x="440" data-y="350"><img src="assets/frames/t_magi.jpg" alt="" loading="lazy"><span class="p-tag">Synthetic</span><span class="p-label">MAGI-1</span></div>
+                                <div class="p-card" style="left: 220px; top: 350px" data-x="220" data-y="350"><img src="assets/frames/t_ltx.jpg" alt="" loading="lazy"><span class="p-tag">Synthetic</span><span class="p-label">LTX-2.3</span></div>
+                                <div class="p-card" style="left: 0px; top: 350px" data-x="0" data-y="350"><img src="assets/frames/t_davinci.jpg" alt="" loading="lazy"><span class="p-tag">Synthetic</span><span class="p-label">daVinci-MagiHuman</span></div>
+                                <div class="p-card" style="left: 0px; top: 180px" data-x="0" data-y="180"><img src="assets/frames/t_helios.jpg" alt="" loading="lazy"><span class="p-tag">Synthetic</span><span class="p-label">Helios</span></div>
+                                <div class="p-caption">
+                                    <div class="cap-full">
+                                        <div class="cap-head"><span>Structured caption</span><span>VideoLLaMA 3</span></div>
+                                        <div class="cap-row"><b>Short description</b><span class="cap-val"><span class="cap-text">A man in traditional white attire sitting and speaking, likely in a news studio setting.</span></span></div>
+                                        <div class="cap-row"><b>Dense description</b><span class="cap-val"><i style="width: 96%"></i><i style="width: 72%"></i></span></div>
+                                        <div class="cap-row"><b>Background</b><span class="cap-val"><i style="width: 84%"></i></span></div>
+                                        <div class="cap-row"><b>Style</b><span class="cap-val"><i style="width: 58%"></i></span></div>
+                                        <div class="cap-row"><b>Shot type</b><span class="cap-val"><i style="width: 66%"></i></span></div>
+                                        <div class="cap-row"><b>Lighting</b><span class="cap-val"><i style="width: 74%"></i></span></div>
+                                        <div class="cap-row"><b>Atmosphere</b><span class="cap-val"><i style="width: 52%"></i></span></div>
+                                        <div class="cap-row"><b>Camera movement</b><span class="cap-val"><i style="width: 62%"></i></span></div>
+                                    </div>
+                                    <div class="cap-prompt"><b>Prompt</b><span>A man in traditional white attire sitting
+                                            and speaking, likely in a news studio setting. [&hellip;]</span></div>
+                                </div>
+                                <figure class="p-real">
+                                    <img src="assets/frames/real_ff.jpg" alt="">
+                                    <span class="p-scan"></span>
+                                    <figcaption><span class="tag tag-real">Real</span>FaceForensics++</figcaption>
+                                </figure>
+                                <p class="p-note">1 real video &middot; 8 synthetic twins &middot; one caption</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ PIPELINE (depth fly-through, pinned) ============ -->
+            <section class="pipeline" id="pipeline">
+                <div class="pipeline-pin">
+                    <div class="z-scene">
+                    <article class="z-stage z-intro" data-i="0">
+                        <p class="z-kicker">How the benchmark was built</p>
+                        <h2 class="section-title">From 1,363 real clips to 81,780 synthetic files.</h2>
+                        <p class="z-lead">Seven steps. Keep scrolling: each one comes at you from the horizon.</p>
+                    </article>
+                    <article class="z-stage" data-i="1">
+                        <header class="z-head"><span class="z-n">01 / 07</span>
+                            <h3>Start from real videos</h3>
+                            <p>Pristine clips from two established benchmarks. Their official split carries over to every synthetic twin.</p>
+                        </header>
+                        <div class="z-v z-v-source">
+                            <div class="z-stack"><img src="assets/frames/real_ff.jpg" alt=""><img src="assets/frames/real_ff.jpg" alt=""><img src="assets/frames/real_ff.jpg" alt="">
+                                <span class="z-cap"><b>1,000</b> FaceForensics++</span></div>
+                            <div class="z-merge"><b class="z-count" data-to="1363">1,363</b><span>pristine videos</span></div>
+                            <div class="z-stack"><img src="assets/frames/real_dfd.jpg" alt=""><img src="assets/frames/real_dfd.jpg" alt=""><img src="assets/frames/real_dfd.jpg" alt="">
+                                <span class="z-cap"><b>363</b> DeepFake Detection</span></div>
+                        </div>
+                    </article>
+                    <article class="z-stage" data-i="2">
+                        <header class="z-head"><span class="z-n">02 / 07</span>
+                            <h3>Describe each one in eight fields</h3>
+                            <p>A vision-language model writes a structured caption. Annotators also pick a reference frame for image-to-video.</p>
+                        </header>
+                        <div class="z-v z-v-caption">
+                            <figure class="z-frame"><img src="assets/frames/real_ff.jpg" alt=""><span class="z-scan"></span>
+                                <figcaption><svg class="z-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"></rect><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"></path></svg> VideoLLaMA 3</figcaption></figure>
+                            <svg class="z-arrow" viewBox="0 0 80 20" aria-hidden="true"><path d="M2 10h72M66 3l8 7-8 7"></path></svg>
+                            <ul class="z-fields">
+                                <li>Short description</li>
+                                <li>Dense description</li>
+                                <li>Background</li>
+                                <li>Style</li>
+                                <li>Shot type</li>
+                                <li>Lighting</li>
+                                <li>Atmosphere</li>
+                                <li>Camera movement</li>
+                            </ul>
+                        </div>
+                    </article>
+                    <article class="z-stage" data-i="3">
+                        <header class="z-head"><span class="z-n">03 / 07</span>
+                            <h3>Check every caption twice</h3>
+                            <p>Human review first, then an LLM screen for sensitive content. Anything flagged is rewritten until both pass.</p>
+                        </header>
+                        <div class="z-v z-v-valid">
+                            <div class="z-doc"><b>Caption</b><i></i><i></i><i></i><i></i></div>
+                            <svg class="z-arrow z-arrow-s" viewBox="0 0 48 20" aria-hidden="true"><path d="M2 10h40M34 3l8 7-8 7"></path></svg>
+                            <div class="z-gate"><svg class="z-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path></svg><b>Prompt check</b><span>by hand, field by field</span></div>
+                            <svg class="z-arrow z-arrow-s" viewBox="0 0 48 20" aria-hidden="true"><path d="M2 10h40M34 3l8 7-8 7"></path></svg>
+                            <div class="z-gate"><svg class="z-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"></rect><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"></path></svg><b>Automated screening</b><span>Llama · 7 categories</span>
+                                <ul class="z-cats"><li>violence</li><li>weapons</li><li>vulnerable individuals</li><li>political figures</li><li>geopolitical references</li><li>national symbols</li><li>identifiable persons</li></ul></div>
+                            <svg class="z-arrow z-arrow-s" viewBox="0 0 48 20" aria-hidden="true"><path d="M2 10h40M34 3l8 7-8 7"></path></svg>
+                            <div class="z-pass"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><b>Approved</b></div>
+                            <div class="z-loop" aria-hidden="true">
+                                <svg>
+                                    <defs><marker id="z-loop-head" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z"></path></marker></defs>
+                                    <path class="z-loop-path z-loop-branch"></path>
+                                    <path class="z-loop-path z-loop-main" marker-end="url(#z-loop-head)"></path>
+                                    <g class="z-loop-x"></g>
+                                </svg>
+                                <span class="z-loop-label"><b>Flagged by either check?</b> The caption is rewritten and checked again.</span>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="z-stage" data-i="4">
+                        <header class="z-head"><span class="z-n">04 / 07</span>
+                            <h3>Generate it with every model</h3>
+                            <p>The caption becomes a prompt for 8 text-to-video generators; 7 image-to-video models also animate the reference frame.</p>
+                        </header>
+                        <div class="z-v z-v-synth">
+                            <div class="z-prompt"><b>Prompt</b><span>from the structured caption</span></div>
+                            <div class="z-rows">
+                                <div class="z-row"><span class="z-row-label">Text-to-video <b>8</b></span><span class="z-gens"><i class="z-gen" title="Wan2.1"><span class="logo" style="-webkit-mask-image: url(assets/logos/wan.png); mask-image: url(assets/logos/wan.png)"></span></i><i class="z-gen" title="CogVideoX"><span class="logo" style="-webkit-mask-image: url(assets/logos/cogvideox.svg); mask-image: url(assets/logos/cogvideox.svg)"></span></i><i class="z-gen" title="SkyReels-V2"><span class="logo" style="-webkit-mask-image: url(assets/logos/skyreels.png); mask-image: url(assets/logos/skyreels.png)"></span></i><i class="z-gen" title="MAGI-1"><span class="logo" style="-webkit-mask-image: url(assets/logos/magi.png); mask-image: url(assets/logos/magi.png)"></span></i><i class="z-gen" title="LTX-2.3"><span class="logo" style="-webkit-mask-image: url(assets/logos/ltx.png); mask-image: url(assets/logos/ltx.png)"></span></i><i class="z-gen z-gen-word" title="daVinci-MagiHuman">daVinci</i><i class="z-gen" title="Helios"><span class="logo" style="-webkit-mask-image: url(assets/logos/helios.png); mask-image: url(assets/logos/helios.png)"></span></i><i class="z-gen z-gen-word" title="Self-Forcing">Self-Forcing</i></span></div>
+                                <div class="z-row"><span class="z-row-label">Image-to-video <b>7</b><em>+ reference frame</em></span><span class="z-gens"><i class="z-gen" title="Wan2.1"><span class="logo" style="-webkit-mask-image: url(assets/logos/wan.png); mask-image: url(assets/logos/wan.png)"></span></i><i class="z-gen" title="CogVideoX"><span class="logo" style="-webkit-mask-image: url(assets/logos/cogvideox.svg); mask-image: url(assets/logos/cogvideox.svg)"></span></i><i class="z-gen" title="SkyReels-V2"><span class="logo" style="-webkit-mask-image: url(assets/logos/skyreels.png); mask-image: url(assets/logos/skyreels.png)"></span></i><i class="z-gen" title="MAGI-1"><span class="logo" style="-webkit-mask-image: url(assets/logos/magi.png); mask-image: url(assets/logos/magi.png)"></span></i><i class="z-gen" title="LTX-2.3"><span class="logo" style="-webkit-mask-image: url(assets/logos/ltx.png); mask-image: url(assets/logos/ltx.png)"></span></i><i class="z-gen z-gen-word" title="daVinci-MagiHuman">daVinci</i><i class="z-gen" title="Helios"><span class="logo" style="-webkit-mask-image: url(assets/logos/helios.png); mask-image: url(assets/logos/helios.png)"></span></i></span></div>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="z-stage" data-i="5">
+                        <header class="z-head"><span class="z-n">05 / 07</span>
+                            <h3>Keep only what looks real</h3>
+                            <p>Five annotators review every video. If any of them rejects it, the prompt is edited or the parameters are tuned and the video is generated again, until all five pass it.</p>
+                        </header>
+                        <div class="z-v z-v-qc" data-phase="accepted">
+                            <figure class="qc-video">
+                                <img src="assets/frames/t_wan.jpg" alt="">
+                                <span class="qc-artifact" aria-hidden="true"><em>artifact</em></span>
+                                <span class="qc-try">Attempt <b>2</b></span>
+                                <figcaption class="qc-verdict">
+                                    <span class="qc-v-no"><b>Rejected</b> · 1 of 5 flagged it</span>
+                                    <span class="qc-v-ok"><b>Accepted</b> · all 5 passed it</span>
+                                </figcaption>
+                            </figure>
+                            <div class="qc-side">
+                                <p class="z-qn"><svg class="z-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path></svg><b>5 annotators</b></p>
+                                <ol class="qc-people"><li class="is-ok"><i>A1</i><span class="qc-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg></span></li><li class="is-ok"><i>A2</i><span class="qc-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg></span></li><li class="is-ok"><i>A3</i><span class="qc-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg></span></li><li class="is-ok"><i>A4</i><span class="qc-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg></span></li><li class="is-ok"><i>A5</i><span class="qc-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg></span></li></ol>
+                                <ul class="z-crit"><li>anatomy</li><li>temporal</li><li>rendering</li><li>semantics</li><li>ethics</li></ul>
+                                <div class="qc-fix">
+                                    <b class="qc-fix-t">Edit the prompt, tune the parameters</b>
+                                    <p class="qc-prompt">&hellip;the man is seated, speaking <ins>with natural mouth movements</ins> into a microphone&hellip;</p>
+                                    <p class="qc-params"><span>seed <del>1407121513</del> <ins>1407121514</ins></span><span>guidance <del>3.0</del> <ins>3.5</ins></span></p>
+                                </div>
+                            </div>
+                            <p class="qc-loop"><span aria-hidden="true">↻</span> Regenerated until all five annotators pass it</p>
+                        </div>
+                    </article>
+                    <article class="z-stage" data-i="6">
+                        <header class="z-head"><span class="z-n">06 / 07</span>
+                            <h3>Encode four versions</h3>
+                            <p>Each accepted video ships raw, lossless and at two compression levels, to test robustness in the wild.</p>
+                        </header>
+                        <div class="z-v z-v-versions">
+                            <figure class="z-ver"><span class="z-zoom"><img src="assets/frames/versions/raw.jpg" alt=""></span><figcaption><b>Raw</b><span>generator output</span></figcaption></figure>
+                            <figure class="z-ver"><span class="z-zoom"><img src="assets/frames/versions/canonical.jpg" alt=""></span><figcaption><b>Canonical</b><span>H.264 CRF 0, lossless</span></figcaption></figure>
+                            <figure class="z-ver"><span class="z-zoom"><img src="assets/frames/versions/crf23.jpg" alt=""></span><figcaption><b>CRF 23</b><span>light compression</span></figcaption></figure>
+                            <figure class="z-ver"><span class="z-zoom"><img src="assets/frames/versions/crf40.jpg" alt=""></span><figcaption><b>CRF 40</b><span>heavy compression</span></figcaption></figure>
+                        </div>
+                    </article>
+                    <article class="z-stage z-last" data-i="7">
+                        <header class="z-head"><span class="z-n">07 / 07</span>
+                            <h3>SynthForensics</h3>
+                            <p>Every video comes with its prompts, seeds, parameters and environment, ready for training and evaluation.</p>
+                        </header>
+                        <div class="z-v z-v-final">
+                            <div class="z-mosaic"><img src="assets/wall_poster.jpg" alt=""></div>
+                            <div class="z-final">
+                                <b class="z-count" data-to="81780">81,780</b>
+                                <span>synthetic video files<br>20,445 unique videos, with metadata and official splits</span>
+                                <a class="btn btn-light z-cta" href="https://huggingface.co/datasets/SynthForensics/SynthForensics"
+                                    target="_blank" rel="noopener"><span class="btn-emoji" aria-hidden="true">🤗</span>Download dataset</a>
+                            </div>
+                        </div>
+                    </article>
+                    </div>
+                    <ol class="z-progress" aria-label="Pipeline steps">
+                        <li><button type="button" data-step="1"><i>01</i><span>Source</span></button></li>
+                        <li><button type="button" data-step="2"><i>02</i><span>Captions</span></button></li>
+                        <li><button type="button" data-step="3"><i>03</i><span>Validation</span></button></li>
+                        <li><button type="button" data-step="4"><i>04</i><span>Synthesis</span></button></li>
+                        <li><button type="button" data-step="5"><i>05</i><span>Quality control</span></button></li>
+                        <li><button type="button" data-step="6"><i>06</i><span>Versions</span></button></li>
+                        <li><button type="button" data-step="7"><i>07</i><span>Dataset</span></button></li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- ============ GENERATORS ============ -->
+            <section class="block" id="generators">
+                <div class="wrap">
+                    <h2 class="section-title" data-split>Eight open-source generators.</h2>
+                    <p class="lead">Architecturally distinct models from 1.3B to 24B parameters, each pinned to the
+                        exact commit used for generation. Seven run in both text-to-video and image-to-video mode.</p>
+                    <div class="gens">
+                        <a class="gen" href="https://github.com/Wan-Video/Wan2.1/tree/325cfd41e64639cf26d76f2b60601384909934cb" target="_blank" rel="noopener">
+                            <div class="gen-logo"><span class="logo" role="img" aria-label="Wan logo" style="-webkit-mask-image: url(assets/logos/wan.png); mask-image: url(assets/logos/wan.png)"></span></div>
+                            <div class="gen-body"><h3>Wan2.1</h3><p>14B</p><span class="modes"><i>T2V</i><i>I2V</i></span><span class="commit">commit 325cfd4</span></div>
                         </a>
-                    </h3>
-                    <p class="paper-authors">
-                        Roberto Leotta<sup>*</sup>,
-                        Salvatore Alfio Sambataro<sup>*</sup>,
-                        Claudio Vittorio Ragaglia,
-                        Mirko Casu,
-                        Yuri Petralia,
-                        Francesco Guarnera,
-                        Luca Guarnera,
-                        Sebastiano Battiato
-                    </p>
-                    <p class="paper-note"><sup>*</sup> Equal contribution</p>
-                </div>
-                <div class="abstract-content reveal-right">
-                    <p>The landscape of synthetic media has been irrevocably altered by text-to-video (T2V) models,
-                        whose outputs are rapidly approaching indistinguishability from reality. Critically, this
-                        technology is no longer confined to large-scale labs; the proliferation of efficient,
-                        open-source generators is democratizing the ability to create high-fidelity synthetic content on
-                        consumer-grade hardware. This makes existing face-centric and manipulation-based benchmarks
-                        obsolete. To address this urgent threat, we introduce <strong>SynthForensics</strong>, to the
-                        best of our knowledge the first human-centric benchmark for detecting <strong>purely synthetic
-                            video deepfakes</strong>. The benchmark comprises <strong>6,815 unique videos</strong> from
-                        five architecturally distinct, state-of-the-art open-source T2V models. Its construction was
-                        underpinned by a meticulous two-stage, human-in-the-loop validation to ensure high semantic and
-                        visual quality. Each video is provided in four versions (raw, lossless, light, and heavy
-                        compression) to enable real-world robustness testing. Experiments demonstrate that
-                        state-of-the-art detectors are both fragile and exhibit limited generalization when evaluated on
-                        this new domain: we observe a mean performance drop of 29.19% AUC, with some methods performing
-                        worse than random chance, and top models losing over 30 points under heavy compression. The
-                        paper further investigates the efficacy of training on SynthForensics as a means to mitigate
-                        these observed performance gaps, achieving robust generalization to unseen generators (93.81%
-                        AUC), though at the cost of reduced backward compatibility with traditional manipulation-based
-                        deepfakes.</p>
-                    <ul class="highlights-list">
-                        <li><strong>6,815 unique videos</strong> (~9.5 hours, 550K+ frames) from 5 state-of-the-art
-                            open-source T2V models</li>
-                        <li><strong>Paired-source protocol</strong>: Each synthetic video paired with a real source
-                            video to control semantic variables</li>
-                        <li><strong>Rigorous validation</strong>: Two-stage human-in-the-loop quality control for
-                            semantic fidelity and ethical compliance</li>
-                        <li><strong>Four compression variants</strong> per video (Raw, Canonical, CRF23, CRF40) for
-                            robustness evaluation</li>
-                        <li><strong>Complete reproducibility</strong>: Full metadata including prompts and generation
-                            parameters for every video</li>
-                        <li><strong>Architectural diversity</strong>: Wan2.1, CogVideoX, SkyReels-V2, Self-Forcing, and
-                            MAGI-1 generators</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Construction Pipeline -->
-        <section id="pipeline" class="content-section reveal">
-            <div class="container-fluid">
-                <h2 class="section-title">Construction Pipeline</h2>
-                <div class="pipeline-image">
-                    <img src="assets/pipeline.jpg" alt="SynthForensics Dataset Construction Pipeline">
-                </div>
-                <div class="pipeline-narrative reveal-left">
-                    <p class="pipeline-intro">
-                        The SynthForensics benchmark was constructed through a rigorous multi-stage pipeline designed to
-                        ensure
-                        high-quality, semantically consistent, and ethically sound synthetic video generation. The
-                        process combines
-                        automated systems with extensive human validation to produce a challenging and realistic
-                        benchmark.
-                    </p>
-
-                    <h3>Source Data and Paired Generation</h3>
-                    <p>
-                        SynthForensics employs a <strong>paired-source protocol</strong> using 1,363 pristine videos
-                        from
-                        FaceForensics++ (1,000 videos) and the DeepFake Detection dataset (363 videos). Each pristine
-                        video
-                        serves as an anchor for generating a corresponding synthetic counterpart via text-to-video
-                        models.
-                        This one-to-one mapping aims to control for high-level semantic variables: by pairing videos
-                        with
-                        matched scene descriptions, subjects, and actions, we minimize content-based confounds and
-                        encourage
-                        detectors to prioritize learning low-level generative artifacts over semantic correlations.
-                    </p>
-
-                    <h3>Structured Prompt Engineering</h3>
-                    <p>
-                        Modern T2V models require careful prompt engineering to achieve high-fidelity output. Following
-                        HunyuanVideo's multi-dimensional framework, we employed a <strong>Vision-Language Model</strong>
-                        to
-                        generate structured metadata for each source video across seven fields: <em>short
-                            description</em>,
-                        <em>dense description</em>, <em>background</em>, <em>style</em>, <em>shot type</em>,
-                        <em>lighting</em>,
-                        and <em>atmosphere</em>. This unified representation serves as a common source from which we
-                        dynamically
-                        construct model-specific prompts by selecting and ordering fields according to each generator's
-                        training
-                        distribution. While prompt structure varies across models, all derive from identical underlying
-                        metadata,
-                        ensuring semantic consistency.
-                    </p>
-
-                    <h3>Human-in-the-Loop Validation</h3>
-                    <p>
-                        Each of the 1,363 structured prompts underwent <strong>manual field-by-field validation</strong>
-                        to
-                        verify consistency with source video content and detect potentially sensitive or harmful
-                        content.
-                        Following manual review, all prompts were subjected to automated screening using a Large
-                        Language Model
-                        to detect subtle sensitive content that might have been missed. The LLM was instructed to flag
-                        references
-                        to violence, weapons, vulnerable individuals, political figures, geopolitical references,
-                        national symbols,
-                        and identifiable persons. Flagged prompts were manually rewritten to neutralize sensitive
-                        elements while
-                        preserving visual and narrative intent.
-                    </p>
-
-                    <h3>Video Synthesis with Generation Diversity</h3>
-                    <p>
-                        To reflect the heterogeneity of modern synthetic media, we introduce diversity across temporal,
-                        spatial,
-                        and format parameters. Following each model's recommended optimal settings, we generated videos
-                        with
-                        durations of 4–6 seconds at frame rates between 8–24 FPS, using resolutions from 480×832 up to
-                        1280×720.
-                        A key distinguishing feature is the <strong>systematic aspect ratio diversity</strong>: we
-                        generated
-                        2,732 landscape videos (16:9, 5:3) and 4,083 portrait videos (3:4, 9:16, 3:5), ensuring
-                        detectors are
-                        tested on fundamental video characteristics rather than overfitting to a single format.
-                    </p>
-
-                    <h3>Iterative Quality Control</h3>
-                    <p>
-                        Every synthesized video underwent <strong>manual inspection</strong> for anatomical
-                        inconsistencies,
-                        rendering errors, temporal artifacts, semantic coherence with prompts, and ethical compliance.
-                        Rejected
-                        videos triggered comprehensive refinement: prompt rewriting, negative prompt augmentation with
-                        artifact-specific keywords, and generation parameter adjustment. This iterative loop of
-                        generation,
-                        inspection, refinement, and regeneration repeated until a high-fidelity, coherent, and ethically
-                        sound
-                        video was accepted. Only videos successfully passing this rigorous validation constitute the
-                        final
-                        6,815 samples.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Dataset Statistics & Benchmark Results -->
-        <section id="dataset-stats" class="content-section reveal shadow-bg">
-            <div class="container-fluid">
-                <h2 class="section-title">Dataset Statistics &amp; Benchmark Results</h2>
-
-                <!-- Key Stats -->
-                <div class="key-stats reveal-scale">
-                    <div class="stat-item">
-                        <span class="stat-number">6,815</span>
-                        <span class="stat-label">Unique Synthetic Videos</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">27,260</span>
-                        <span class="stat-label">Total Video Files</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">~550,000</span>
-                        <span class="stat-label">Total Frames</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">~9.5h</span>
-                        <span class="stat-label">Total Duration</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">2,732</span>
-                        <span class="stat-label">Landscape Videos (16:9, 5:3)</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">4,083</span>
-                        <span class="stat-label">Portrait Videos (3:4, 9:16, 3:5)</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">480&times;832 &mdash; 1280&times;720</span>
-                        <span class="stat-label">Resolution Range</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">8&ndash;24 FPS</span>
-                        <span class="stat-label">Frame Rate Range</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">4&ndash;6s</span>
-                        <span class="stat-label">Duration Range</span>
+                        <a class="gen" href="https://github.com/zai-org/CogVideo/tree/5ab1e2449ffc8887ffad3ca3b9efd22ad7e356f7" target="_blank" rel="noopener">
+                            <div class="gen-logo"><span class="logo" role="img" aria-label="CogVideoX logo" style="-webkit-mask-image: url(assets/logos/cogvideox.svg); mask-image: url(assets/logos/cogvideox.svg); --s: 1.12"></span></div>
+                            <div class="gen-body"><h3>CogVideoX</h3><p>5B</p><span class="modes"><i>T2V</i><i>I2V</i></span><span class="commit">commit 5ab1e24</span></div>
+                        </a>
+                        <a class="gen" href="https://github.com/SkyworkAI/SkyReels-V2/tree/0790f89b91981a37ce1fdb0a76e7f10ffc8b9903" target="_blank" rel="noopener">
+                            <div class="gen-logo"><span class="logo" role="img" aria-label="SkyReels logo" style="-webkit-mask-image: url(assets/logos/skyreels.png); mask-image: url(assets/logos/skyreels.png)"></span></div>
+                            <div class="gen-body"><h3>SkyReels-V2</h3><p>14B</p><span class="modes"><i>T2V</i><i>I2V</i></span><span class="commit">commit 0790f89</span></div>
+                        </a>
+                        <a class="gen" href="https://github.com/SandAI-org/MAGI-1/tree/e7eeccf126f9294e7e119a90d1a57b9979faad36" target="_blank" rel="noopener">
+                            <div class="gen-logo"><span class="logo" role="img" aria-label="MAGI logo" style="-webkit-mask-image: url(assets/logos/magi.png); mask-image: url(assets/logos/magi.png)"></span></div>
+                            <div class="gen-body"><h3>MAGI-1</h3><p>24B · distilled</p><span class="modes"><i>T2V</i><i>I2V</i></span><span class="commit">commit e7eeccf</span></div>
+                        </a>
+                        <a class="gen" href="https://github.com/guandeh17/Self-Forcing/tree/eb36b56aca91528bf5f1dcf36395e5c7151071e2" target="_blank" rel="noopener">
+                            <div class="gen-logo"><span class="wordmark">Self-Forcing</span></div>
+                            <div class="gen-body"><h3>Self-Forcing</h3><p>1.3B</p><span class="modes"><i>T2V</i></span><span class="commit">commit eb36b56</span></div>
+                        </a>
+                        <a class="gen" href="https://github.com/Lightricks/LTX-2/tree/9e8a28e17ac4dd9e49695223d50753a1ebda36fe" target="_blank" rel="noopener">
+                            <div class="gen-logo"><span class="logo" role="img" aria-label="LTX logo" style="-webkit-mask-image: url(assets/logos/ltx.png); mask-image: url(assets/logos/ltx.png); --s: .68"></span></div>
+                            <div class="gen-body"><h3>LTX-2.3</h3><p>22B</p><span class="modes"><i>T2V</i><i>I2V</i></span><span class="commit">commit 9e8a28e</span></div>
+                        </a>
+                        <a class="gen" href="https://github.com/GAIR-NLP/daVinci-MagiHuman/tree/f9764ced3f33017e75795f80adb9dcfd3ca68d38" target="_blank" rel="noopener">
+                            <div class="gen-logo"><span class="wordmark wordmark-2l">daVinci-<br>MagiHuman</span></div>
+                            <div class="gen-body"><h3>daVinci-MagiHuman</h3><p>15B · distilled</p><span class="modes"><i>T2V</i><i>I2V</i></span><span class="commit">commit f9764ce</span></div>
+                        </a>
+                        <a class="gen" href="https://github.com/PKU-YuanGroup/Helios/tree/5cb7ce9f95ce7df336ef072b9c8105321d6db54a" target="_blank" rel="noopener">
+                            <div class="gen-logo"><span class="logo" role="img" aria-label="Helios logo" style="-webkit-mask-image: url(assets/logos/helios.png); mask-image: url(assets/logos/helios.png); --s: 1.08"></span></div>
+                            <div class="gen-body"><h3>Helios</h3><p>14B · distilled</p><span class="modes"><i>T2V</i><i>I2V</i></span><span class="commit">commit 5cb7ce9</span></div>
+                        </a>
                     </div>
                 </div>
+            </section>
 
-                <!-- Benchmark Results -->
-                <h3 class="subsection-title" style="margin-top: 4rem;">Benchmark Results</h3>
-                <p class="section-subtitle">Comprehensive evaluation of 9 state-of-the-art deepfake detectors across
-                    multiple scenarios. (* Frame level detectors)</p>
-
-                <div class="chart-full card" style="margin-top: 2rem;">
-                    <h3>Zero-Shot Performance on SynthForensics (AUC %)</h3>
-                    <canvas id="zeroShotChart"></canvas>
-                </div>
-                <div class="chart-full card" style="margin-top: 2rem;">
-                    <h3>Fine-Tuning Results (AUC %)</h3>
-                    <canvas id="fineTuningChart"></canvas>
-                </div>
-                <div class="chart-full card" style="margin-top: 2rem;">
-                    <h3>Generalization to Unseen Generators (AUC %)</h3>
-                    <canvas id="generalizationChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!-- T2V Models -->
-        <section id="t2v-models" class="content-section reveal">
-            <div class="container-fluid">
-                <h2 class="section-title">Text-to-Video Models</h2>
-                <p class="section-subtitle">The benchmark uses five state-of-the-art open-source T2V generators with
-                    diverse architectures.</p>
-                <div class="models-grid">
-                    <div class="model-card card">
-                        <div class="model-logo">
-                            <img src="assets/wan_logo.png" alt="Wan2.1 Logo">
+            <!-- ============ REALISM ============ -->
+            <section class="block block-alt" id="realism">
+                <div class="wrap">
+                    <h2 class="section-title" data-split>People can't tell either.</h2>
+                    <p class="lead">A paired-comparison study against nine existing synthetic-video benchmarks, with 118
+                        retained participants and 4,121 ratings per question.</p>
+                    <div class="realism-nums">
+                        <div><span class="big" data-count="71.5" data-decimals="1" data-suffix="%">71.5%</span><p>of
+                                head-to-head comparisons prefer SynthForensics on overall quality</p></div>
+                        <div><span class="big" data-count="76.5" data-decimals="1" data-suffix="%">76.5%</span><p>prefer
+                                it on realism</p></div>
+                        <div><span class="big big-red" data-count="37.5" data-decimals="1" data-suffix="%">37.5%</span>
+                            <p>of SynthForensics clips were flagged as fake, against 84.1% for existing benchmarks</p>
                         </div>
-                        <h3>Wan2.1</h3>
-                        <p class="model-params">14B parameters</p>
-                        <p>High-fidelity video generation with advanced temporal consistency.</p>
-                        <a href="https://github.com/Wan-Video/Wan2.1/tree/325cfd41e64639cf26d76f2b60601384909934cb"
-                            class="model-link" target="_blank">View on GitHub →</a>
                     </div>
-                    <div class="model-card card">
-                        <div class="model-logo">
-                            <img src="assets/Cog_logo.svg" alt="CogVideoX Logo">
-                        </div>
-                        <h3>CogVideoX</h3>
-                        <p class="model-params">5B parameters</p>
-                        <p>Efficient transformer-based architecture for realistic video synthesis.</p>
-                        <a href="https://github.com/zai-org/CogVideo/tree/5ab1e2449ffc8887ffad3ca3b9efd22ad7e356f7"
-                            class="model-link" target="_blank">View on GitHub →</a>
-                    </div>
-                    <div class="model-card card">
-                        <div class="model-logo">
-                            <img src="assets/sky_logo.png" alt="SkyReels-V2 Logo">
-                        </div>
-                        <h3>SkyReels-V2</h3>
-                        <p class="model-params">14B parameters</p>
-                        <p>Cinematic quality video generation optimized for narrative content.</p>
-                        <a href="https://github.com/SkyworkAI/SkyReels-V2/tree/0790f89b91981a37ce1fdb0a76e7f10ffc8b9903"
-                            class="model-link" target="_blank">View on GitHub →</a>
-                    </div>
-                    <div class="model-card card">
-                        <div class="model-logo model-logo-placeholder">
-                            <span>SF</span>
-                        </div>
-                        <h3>Self-Forcing</h3>
-                        <p class="model-params">1.3B parameters</p>
-                        <p>Compact architecture with novel attention mechanisms for efficiency.</p>
-                        <a href="https://github.com/guandeh17/Self-Forcing/tree/eb36b56aca91528bf5f1dcf36395e5c7151071e2"
-                            class="model-link" target="_blank">View on GitHub →</a>
-                    </div>
-                    <div class="model-card card">
-                        <div class="model-logo">
-                            <img src="assets/magi_logo.png" alt="MAGI-1 Logo">
-                        </div>
-                        <h3>MAGI-1</h3>
-                        <p class="model-params">24B parameters</p>
-                        <p>Largest model with exceptional photorealistic quality and motion realism.</p>
-                        <a href="https://github.com/SandAI-org/MAGI-1/tree/e7eeccf126f9294e7e119a90d1a57b9979faad36"
-                            class="model-link" target="_blank">View on GitHub →</a>
+                    <div class="rz">
+                        <article class="rz-row" id="landmarks">
+                            <div class="rz-copy">
+                                <span class="rz-kicker">Landmark stability · FAN</span>
+                                <h3>Landmarks that hold like real faces.</h3>
+                                <p>Landmark completeness tracks the real FF++/DFD curves across FAN thresholds, while
+                                    nine existing synthetic benchmarks fall well below.</p>
+                                <div class="chart-legend" aria-hidden="true">
+                                    <span><i class="ln ln-sf"></i>SynthForensics</span>
+                                    <span><i class="ln ln-ff"></i>FF++ (real)</span>
+                                    <span><i class="ln ln-dfd"></i>DFD (real)</span>
+                                    <span><i class="ln ln-other"></i>Other synthetic benchmarks</span>
+                                </div>
+                            </div>
+                            <div class="rz-chart">
+                                <div class="lm" role="img"
+                                    aria-label="Landmark completeness across FAN thresholds: SynthForensics follows the FF++ and DFD real-video curves, the nine existing synthetic benchmarks fall well below">
+                                </div>
+                            </div>
+                        </article>
+                        <article class="rz-row rz-flip" id="face-quality">
+                            <div class="rz-copy">
+                                <span class="rz-kicker">Face quality · TOPIQ-NR-Face</span>
+                                <h3>Inside the real-video range.</h3>
+                                <p>Mean TOPIQ-NR-Face falls within the FF++/DFD real-video range, and SynthForensics is
+                                    the closest benchmark to FF++ in 1-D Wasserstein distance.</p>
+                                <div class="chart-legend" aria-hidden="true">
+                                    <span><i class="sw sw-sf"></i>SynthForensics</span>
+                                    <span><i class="sw sw-real"></i>Real videos</span>
+                                    <span><i class="sw sw-other"></i>Other synthetic benchmarks</span>
+                                </div>
+                            </div>
+                            <div class="rz-chart">
+                                <div class="fq" role="img"
+                                    aria-label="Mean TOPIQ-NR-Face score per benchmark. SynthForensics 0.471, inside the real-video range between FF++ (0.442) and DFD (0.601)">
+                                </div>
+                            </div>
+                        </article>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Dataset Section -->
-        <section id="dataset" class="content-section reveal shadow-bg">
-            <div class="container-fluid">
-                <h2 class="section-title">Dataset</h2>
+            <!-- ============ RESULTS ============ -->
+            <section class="block" id="results">
+                <div class="wrap">
+                    <h2 class="section-title" data-split>Detectors that excel on FF++ meet a new challenge.</h2>
+                    <p class="lead">15 face-based and synthetic-video detectors under three protocols. Each row pairs a
+                        detector's AUC on legacy data with its AUC on SynthForensics.</p>
 
-                <!-- Dataset Structure -->
-                <div class="dataset-subsection">
-                    <h3 class="subsection-title">📁 Dataset Structure</h3>
-                    <p class="section-subtitle">The benchmark is organized into metadata and video directories, with
-                        four compression variants per video.</p>
-                    <pre class="dir-tree"><code>SynthForensics/
-├── metadata/
-│   ├── cogvideox/
-│   │   ├── 000_cogvideox.json
-│   │   └── ...
-│   ├── magi-1/
-│   ├── self-forcing/
-│   ├── skyreels-v2/
-│   └── wan2-1/
-│
-└── videos/
-    ├── canonical/          ← Lossless re-encoding (H.264 CRF=0)
-    │   ├── cogvideox/
-    │   ├── magi-1/
-    │   ├── self-forcing/
-    │   ├── skyreels-v2/
-    │   └── wan2-1/
-    ├── crf23/              ← Light compression
-    │   └── ...
-    ├── crf40/              ← Heavy compression
-    │   └── ...
-    └── raw/                ← Direct generator output
-        └── ...</code></pre>
-                </div>
-
-                <!-- Dataset Splits -->
-                <div class="dataset-subsection">
-                    <h3 class="subsection-title">🔀 Dataset Splits</h3>
-                    <p>The dataset is divided into three standard splits provided as JSON files:</p>
-                    <ul class="dataset-splits-list">
-                        <li><code>splits/train.json</code></li>
-                        <li><code>splits/val.json</code></li>
-                        <li><code>splits/test.json</code></li>
-                    </ul>
-                    <div class="info-box">
-                        <strong>Split Protocol:</strong> The dataset follows the official FaceForensics++ split
-                        assignment. Each source video ID determines the split membership for all its corresponding
-                        synthetic versions across all five generators and all four compression variants. This ensures
-                        synthetic videos from the same real source remain in the same split, preventing data leakage and
-                        enabling fair generalization evaluation.
+                    <div class="results">
+                        <div class="results-top">
+                            <div class="seg" role="tablist" aria-label="Protocol">
+                                <button role="tab" aria-selected="true" data-tab="zs">Zero-shot</button>
+                                <button role="tab" aria-selected="false" data-tab="ft">Fine-tuning</button>
+                                <button role="tab" aria-selected="false" data-tab="sc">From scratch</button>
+                                <span class="seg-pill" aria-hidden="true"></span>
+                            </div>
+                            <div class="legend">
+                                <span><i class="dot-blue"></i><b class="lg-blue">AUC on FF++</b></span>
+                                <span><i class="dot-red"></i><b class="lg-red">Zero-shot AUC on SF-FF++</b></span>
+                            </div>
+                        </div>
+                        <div class="results-body">
+                            <div class="chart">
+                                <div class="chart-head"><span>Detector</span><span>AUC (%)</span><span
+                                        class="delta-head">Gap</span></div>
+                                <div class="chart-rows"></div>
+                                <div class="chart-axis"></div>
+                                <p class="footnote">* Frame-level detector.</p>
+                            </div>
+                            <aside class="takeaway">
+                                <span class="tk-big">−27</span>
+                                <p class="tk-label"></p>
+                                <p class="tk-body"></p>
+                            </aside>
+                        </div>
+                        <p class="results-more">These are the headline numbers. For the full results of every detector,
+                            protocol and compression level, <a href="https://arxiv.org/abs/2602.04939" target="_blank"
+                                rel="noopener">read the paper&nbsp;→</a></p>
                     </div>
                 </div>
+            </section>
 
-                <!-- Dataset Metadata -->
-                <div class="dataset-subsection">
-                    <h3 class="subsection-title">🗂️ Dataset Metadata</h3>
-                    <p>Each video is accompanied by structured metadata for reproducibility and artifact analysis:</p>
-                    <div class="metadata-grid">
-                        <div class="metadata-field">
-                            <span class="field-name">filename</span>
-                            <span class="field-desc">Name of the video file</span>
+            <!-- ============ DATASET ============ -->
+            <section class="block block-alt" id="dataset">
+                <div class="wrap">
+                    <h2 class="section-title" data-split>Organized for research.</h2>
+                    <p class="lead">Two subsets, T2V and I2V, each in four compression versions, with per-video
+                        metadata, dense captions of the sources and official splits that follow FF++.</p>
+                    <div class="ds-grid">
+                        <div class="tree" role="tree" aria-label="Dataset structure">
+                            <details open>
+                                <summary>SynthForensics/</summary>
+                                <details open>
+                                    <summary>T2V/</summary>
+                                    <details>
+                                        <summary>videos/</summary>
+                                        <div class="leaf"><b>raw/</b><em>generator output</em></div>
+                                        <div class="leaf"><b>canonical/</b><em>H.264 CRF 0, lossless</em></div>
+                                        <div class="leaf"><b>crf23/</b><em>light compression</em></div>
+                                        <div class="leaf"><b>crf40/</b><em>heavy compression</em></div>
+                                    </details>
+                                    <details>
+                                        <summary>metadata/</summary>
+                                        <div class="leaf"><b>&lt;generator&gt;/&lt;ID&gt;_&lt;gen&gt;_t2v.json</b></div>
+                                    </details>
+                                </details>
+                                <details>
+                                    <summary>I2V/</summary>
+                                    <div class="leaf"><b>videos/</b><em>same four versions</em></div>
+                                    <div class="leaf"><b>i2v_frames/</b><em>conditioning frames</em></div>
+                                    <div class="leaf"><b>metadata/</b><em>7 generators</em></div>
+                                </details>
+                                <div class="leaf"><b>captions/</b><em>dense captions of the sources</em></div>
+                                <div class="leaf"><b>train.json · val.json · test.json</b><em>FF++ split</em></div>
+                            </details>
                         </div>
-                        <div class="metadata-field">
-                            <span class="field-name">width / height</span>
-                            <span class="field-desc">Video dimensions in pixels</span>
-                        </div>
-                        <div class="metadata-field">
-                            <span class="field-name">video_length</span>
-                            <span class="field-desc">Duration in frames</span>
-                        </div>
-                        <div class="metadata-field">
-                            <span class="field-name">fps</span>
-                            <span class="field-desc">Frame rate (frames per second)</span>
-                        </div>
-                        <div class="metadata-field">
-                            <span class="field-name">prompt</span>
-                            <span class="field-desc">Detailed textual description used for generation</span>
-                        </div>
-                        <div class="metadata-field">
-                            <span class="field-name">negative_prompt</span>
-                            <span class="field-desc">Keywords to suppress unwanted artifacts</span>
-                        </div>
-                        <div class="metadata-field">
-                            <span class="field-name">cfg</span>
-                            <span class="field-desc">Classifier-Free Guidance scale</span>
-                        </div>
-                        <div class="metadata-field">
-                            <span class="field-name">sample_steps</span>
-                            <span class="field-desc">Number of sampling steps</span>
-                        </div>
-                        <div class="metadata-field">
-                            <span class="field-name">sample_shift</span>
-                            <span class="field-desc">Additional sampling shift parameter</span>
-                        </div>
-                        <div class="metadata-field">
-                            <span class="field-name">seed</span>
-                            <span class="field-desc">Random seed for reproducibility</span>
-                        </div>
-                    </div>
-
-                    <!-- Example JSON -->
-                    <h4 class="subsubsection-title">Example Metadata Entry</h4>
-                    <div class="citation-container card" style="margin-top: 1rem;">
-                        <pre><code id="metadata-example">{
-  "filename": "01__hugging_happy_first5sec",
-  "width": 832,
-  "height": 480,
-  "video_length": 81,
-  "fps": 16,
-  "cfg": 5.0,
-  "sample_shift": 5.0,
-  "sample_steps": 50,
-  "seed": 5944222960940485854,
-  "prompt": "The video has a candid and informal style, capturing a spontaneous moment between two individuals...",
-  "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕..."
+                        <div class="code-card">
+                            <div class="code-head"><span>LTX-2.3 · I2V · metadata (excerpt)</span><button class="copy"
+                                    data-copy="#meta-code">Copy</button></div>
+<pre><code id="meta-code">{
+  <span class="tk">"generator"</span>: <span class="ts">"LTX-2.3"</span>,
+  <span class="tk">"mode"</span>: <span class="ts">"i2v"</span>,
+  <span class="tk">"text_encoder"</span>: <span class="ts">"gemma-3-12b"</span>,
+  <span class="tk">"prompt"</span>: <span class="ts">"A man in traditional white attire sitting
+             and speaking, likely in a news studio setting. [...]"</span>,
+  <span class="tk">"seed"</span>: <span class="tn">1364115978</span>,
+  <span class="tk">"width"</span>: <span class="tn">1536</span>, <span class="tk">"height"</span>: <span class="tn">1024</span>,
+  <span class="tk">"num_frames"</span>: <span class="tn">121</span>, <span class="tk">"frame_rate"</span>: <span class="tn">24</span>,
+  <span class="tk">"num_inference_steps"</span>: <span class="tn">30</span>,
+  <span class="tk">"source_caption"</span>: <span class="ts">"000.json"</span>, <span class="tk">"source_image"</span>: <span class="ts">"000.png"</span>,
+  <span class="tk">"environment"</span>: { <span class="tk">"repo_commit"</span>: <span class="ts">"9e8a28e1…"</span>, <span class="tk">"gpu_name"</span>: <span class="ts">"A100 80GB"</span> },
+  <span class="tk">"generation_time_seconds"</span>: <span class="tn">264.0</span>
 }</code></pre>
-                        <button class="copy-btn" onclick="copyMetadata()">Copy JSON</button>
-                    </div>
-                </div>
-
-                <!-- Version Descriptions -->
-                <div class="dataset-subsection">
-                    <h3 class="subsection-title">🗜️ Compression Variants</h3>
-                    <p>Each video is provided in four versions to enable real-world robustness testing:</p>
-                    <div class="versions-grid">
-                        <div class="version-card card">
-                            <div class="version-badge badge-raw">Raw</div>
-                            <p>Direct, unprocessed generator output. Preserves all original generation artifacts.</p>
-                        </div>
-                        <div class="version-card card">
-                            <div class="version-badge badge-canonical">Canonical</div>
-                            <p>Lossless re-encoding (H.264 CRF=0, YUV420p, BT.709) with uniform parameters across all
-                                generators.</p>
-                        </div>
-                        <div class="version-card card">
-                            <div class="version-badge badge-crf23">CRF23</div>
-                            <p>Light compression simulating standard online platform distribution.</p>
-                        </div>
-                        <div class="version-card card">
-                            <div class="version-badge badge-crf40">CRF40</div>
-                            <p>Heavy compression simulating aggressive distribution and social media scenarios.</p>
                         </div>
                     </div>
                 </div>
+            </section>
 
-            </div>
-        </section>
+            <!-- ============ DOWNLOAD ============ -->
+            <section class="block" id="download">
+                <div class="wrap">
+                    <h2 class="section-title" data-split>Get SynthForensics.</h2>
+                    <p class="lead">The benchmark is hosted on Hugging Face. Accept the terms on the dataset page and
+                        access is granted automatically.</p>
+                    <div class="brandlinks">
+                        <div class="brandlink-col">
+                            <a class="brandlink bl-hf" href="https://huggingface.co/datasets/SynthForensics/SynthForensics"
+                                target="_blank" rel="noopener" aria-label="Download the SynthForensics dataset on Hugging Face">
+                                <svg class="bl-art" viewBox="0 0 560 96" aria-hidden="true">
+                                    <g transform="translate(0 4)">
+                                    <path class="bl-draw" pathLength="1" fill="#FFD21E" stroke="#FFD21E" d="M47.21 76.5a34.75 34.75 0 1 0 0-69.5 34.75 34.75 0 0 0 0 69.5Z"></path>
+                                    <path class="bl-draw" pathLength="1" fill="#FF9D0B" stroke="#FF9D0B" d="M81.96 41.75a34.75 34.75 0 1 0-69.5 0 34.75 34.75 0 0 0 69.5 0Zm-73.5 0a38.75 38.75 0 1 1 77.5 0 38.75 38.75 0 0 1-77.5 0Z"></path>
+                                    <path class="bl-draw" pathLength="1" fill="#3A3B45" stroke="#3A3B45" d="M58.5 32.3c1.28.44 1.78 3.06 3.07 2.38a5 5 0 1 0-6.76-2.07c.61 1.15 2.55-.72 3.7-.32ZM34.95 32.3c-1.28.44-1.79 3.06-3.07 2.38a5 5 0 1 1 6.76-2.07c-.61 1.15-2.56-.72-3.7-.32Z"></path>
+                                    <path class="bl-draw" pathLength="1" fill="#FF323D" stroke="#FF323D" d="M46.96 56.29c9.83 0 13-8.76 13-13.26 0-2.34-1.57-1.6-4.09-.36-2.33 1.15-5.46 2.74-8.9 2.74-7.19 0-13-6.88-13-2.38s3.16 13.26 13 13.26Z"></path>
+                                    <path class="bl-draw" pathLength="1" fill="#3A3B45" stroke="#3A3B45" fill-rule="evenodd" clip-rule="evenodd" d="M39.43 54a8.7 8.7 0 0 1 5.3-4.49c.4-.12.81.57 1.24 1.28.4.68.82 1.37 1.24 1.37.45 0 .9-.68 1.33-1.35.45-.7.89-1.38 1.32-1.25a8.61 8.61 0 0 1 5 4.17c3.73-2.94 5.1-7.74 5.1-10.7 0-2.34-1.57-1.6-4.09-.36l-.14.07c-2.31 1.15-5.39 2.67-8.77 2.67s-6.45-1.52-8.77-2.67c-2.6-1.29-4.23-2.1-4.23.29 0 3.05 1.46 8.06 5.47 10.97Z"></path>
+                                    <path class="bl-draw" pathLength="1" fill="#FF9D0B" stroke="#FF9D0B" d="M70.71 37a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5ZM24.21 37a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5ZM17.52 48c-1.62 0-3.06.66-4.07 1.87a5.97 5.97 0 0 0-1.33 3.76 7.1 7.1 0 0 0-1.94-.3c-1.55 0-2.95.59-3.94 1.66a5.8 5.8 0 0 0-.8 7 5.3 5.3 0 0 0-1.79 2.82c-.24.9-.48 2.8.8 4.74a5.22 5.22 0 0 0-.37 5.02c1.02 2.32 3.57 4.14 8.52 6.1 3.07 1.22 5.89 2 5.91 2.01a44.33 44.33 0 0 0 10.93 1.6c5.86 0 10.05-1.8 12.46-5.34 3.88-5.69 3.33-10.9-1.7-15.92-2.77-2.78-4.62-6.87-5-7.77-.78-2.66-2.84-5.62-6.25-5.62a5.7 5.7 0 0 0-4.6 2.46c-1-1.26-1.98-2.25-2.86-2.82A7.4 7.4 0 0 0 17.52 48Zm0 4c.51 0 1.14.22 1.82.65 2.14 1.36 6.25 8.43 7.76 11.18.5.92 1.37 1.31 2.14 1.31 1.55 0 2.75-1.53.15-3.48-3.92-2.93-2.55-7.72-.68-8.01.08-.02.17-.02.24-.02 1.7 0 2.45 2.93 2.45 2.93s2.2 5.52 5.98 9.3c3.77 3.77 3.97 6.8 1.22 10.83-1.88 2.75-5.47 3.58-9.16 3.58-3.81 0-7.73-.9-9.92-1.46-.11-.03-13.45-3.8-11.76-7 .28-.54.75-.76 1.34-.76 2.38 0 6.7 3.54 8.57 3.54.41 0 .7-.17.83-.6.79-2.85-12.06-4.05-10.98-8.17.2-.73.71-1.02 1.44-1.02 3.14 0 10.2 5.53 11.68 5.53.11 0 .2-.03.24-.1.74-1.2.33-2.04-4.9-5.2-5.21-3.16-8.88-5.06-6.8-7.33.24-.26.58-.38 1-.38 3.17 0 10.66 6.82 10.66 6.82s2.02 2.1 3.25 2.1c.28 0 .52-.1.68-.38.86-1.46-8.06-8.22-8.56-11.01-.34-1.9.24-2.85 1.31-2.85Z"></path>
+                                    <path class="bl-draw" pathLength="1" fill="#FFD21E" stroke="#FFD21E" d="M38.6 76.69c2.75-4.04 2.55-7.07-1.22-10.84-3.78-3.77-5.98-9.3-5.98-9.3s-.82-3.2-2.69-2.9c-1.87.3-3.24 5.08.68 8.01 3.91 2.93-.78 4.92-2.29 2.17-1.5-2.75-5.62-9.82-7.76-11.18-2.13-1.35-3.63-.6-3.13 2.2.5 2.79 9.43 9.55 8.56 11-.87 1.47-3.93-1.71-3.93-1.71s-9.57-8.71-11.66-6.44c-2.08 2.27 1.59 4.17 6.8 7.33 5.23 3.16 5.64 4 4.9 5.2-.75 1.2-12.28-8.53-13.36-4.4-1.08 4.11 11.77 5.3 10.98 8.15-.8 2.85-9.06-5.38-10.74-2.18-1.7 3.21 11.65 6.98 11.76 7.01 4.3 1.12 15.25 3.49 19.08-2.12Z"></path>
+                                    <path class="bl-draw" pathLength="1" fill="#FF9D0B" stroke="#FF9D0B" d="M77.4 48c1.62 0 3.07.66 4.07 1.87a5.97 5.97 0 0 1 1.33 3.76 7.1 7.1 0 0 1 1.95-.3c1.55 0 2.95.59 3.94 1.66a5.8 5.8 0 0 1 .8 7 5.3 5.3 0 0 1 1.78 2.82c.24.9.48 2.8-.8 4.74a5.22 5.22 0 0 1 .37 5.02c-1.02 2.32-3.57 4.14-8.51 6.1-3.08 1.22-5.9 2-5.92 2.01a44.33 44.33 0 0 1-10.93 1.6c-5.86 0-10.05-1.8-12.46-5.34-3.88-5.69-3.33-10.9 1.7-15.92 2.78-2.78 4.63-6.87 5.01-7.77.78-2.66 2.83-5.62 6.24-5.62a5.7 5.7 0 0 1 4.6 2.46c1-1.26 1.98-2.25 2.87-2.82A7.4 7.4 0 0 1 77.4 48Zm0 4c-.51 0-1.13.22-1.82.65-2.13 1.36-6.25 8.43-7.76 11.18a2.43 2.43 0 0 1-2.14 1.31c-1.54 0-2.75-1.53-.14-3.48 3.91-2.93 2.54-7.72.67-8.01a1.54 1.54 0 0 0-.24-.02c-1.7 0-2.45 2.93-2.45 2.93s-2.2 5.52-5.97 9.3c-3.78 3.77-3.98 6.8-1.22 10.83 1.87 2.75 5.47 3.58 9.15 3.58 3.82 0 7.73-.9 9.93-1.46.1-.03 13.45-3.8 11.76-7-.29-.54-.75-.76-1.34-.76-2.38 0-6.71 3.54-8.57 3.54-.42 0-.71-.17-.83-.6-.8-2.85 12.05-4.05 10.97-8.17-.19-.73-.7-1.02-1.44-1.02-3.14 0-10.2 5.53-11.68 5.53-.1 0-.19-.03-.23-.1-.74-1.2-.34-2.04 4.88-5.2 5.23-3.16 8.9-5.06 6.8-7.33-.23-.26-.57-.38-.98-.38-3.18 0-10.67 6.82-10.67 6.82s-2.02 2.1-3.24 2.1a.74.74 0 0 1-.68-.38c-.87-1.46 8.05-8.22 8.55-11.01.34-1.9-.24-2.85-1.31-2.85Z"></path>
+                                    <path class="bl-draw" pathLength="1" fill="#FFD21E" stroke="#FFD21E" d="M56.33 76.69c-2.75-4.04-2.56-7.07 1.22-10.84 3.77-3.77 5.97-9.3 5.97-9.3s.82-3.2 2.7-2.9c1.86.3 3.23 5.08-.68 8.01-3.92 2.93.78 4.92 2.28 2.17 1.51-2.75 5.63-9.82 7.76-11.18 2.13-1.35 3.64-.6 3.13 2.2-.5 2.79-9.42 9.55-8.55 11 .86 1.47 3.92-1.71 3.92-1.71s9.58-8.71 11.66-6.44c2.08 2.27-1.58 4.17-6.8 7.33-5.23 3.16-5.63 4-4.9 5.2.75 1.2 12.28-8.53 13.36-4.4 1.08 4.11-11.76 5.3-10.97 8.15.8 2.85 9.05-5.38 10.74-2.18 1.69 3.21-11.65 6.98-11.76 7.01-4.31 1.12-15.26 3.49-19.08-2.12Z"></path>
+                                    <path class="bl-trace" pathLength="1" d="M8.46 41.75a38.75 38.75 0 1 1 77.5 0 38.75 38.75 0 0 1-77.5 0Z"></path>
+                                    </g>
+                                    <text class="bl-word" x="112" y="67">Hugging Face</text>
+                                    <text class="bl-word-trace" x="112" y="67">Hugging Face</text>
+                                </svg>
+                                <span class="bl-meta">Full dataset · 20,445 videos × 4 versions · 299 GB <svg class="bl-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"></path></svg></span>
+                            </a>
+                            <a class="bl-sub" href="https://huggingface.co/datasets/SynthForensics/SynthForensics_sample"
+                                target="_blank" rel="noopener">or explore the sample first</a>
+                        </div>
+                        <div class="brandlink-col">
+                            <a class="brandlink bl-gh" href="https://github.com/rorobertostring/Synthforensics" target="_blank" rel="noopener"
+                                aria-label="SynthForensics code on GitHub">
+                                <svg class="bl-art" viewBox="0 0 330 96" aria-hidden="true">
+                                    <g transform="translate(6 10) scale(4.75)">
+                                        <path class="bl-draw" pathLength="1" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                                        <path class="bl-trace" pathLength="1" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                                    </g>
+                                    <text class="bl-word" x="104" y="67">GitHub</text>
+                                    <text class="bl-word-trace" x="104" y="67">GitHub</text>
+                                </svg>
+                                <span class="bl-meta">Code · generation, detectors, experiments <svg class="bl-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"></path></svg></span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="code-card">
+                        <div class="code-head"><span>Quick start</span><button class="copy"
+                                data-copy="#dl-code">Copy</button></div>
+<pre><code id="dl-code"><span class="tc"># accept the terms on the dataset page, then:</span>
+hf auth login
+hf download SynthForensics/SynthForensics --repo-type dataset --local-dir SynthForensics
 
-        <!-- Download -->
-        <section id="download" class="content-section reveal">
-            <div class="container-fluid">
-                <h2 class="section-title">Download</h2>
-                <p class="section-subtitle">The complete SynthForensics benchmark will be made available through the
-                    following access methods.</p>
-
-                <div class="download-notice">
-                    <span class="download-notice-icon">🔔</span>
-                    <p>Dataset access methods are currently being finalized. Sign up for notifications or check back
-                        soon.</p>
+<span class="tc"># or just the lightly compressed T2V videos</span>
+hf download SynthForensics/SynthForensics --repo-type dataset --local-dir SynthForensics \
+    --include "T2V/videos/crf23/*"</code></pre>
+                    </div>
+                    <p class="fine">Use is limited to non-commercial research and education; cite SynthForensics together with
+                        FF++ and DFD, and do not redistribute outside the original repository. Dataset licensed under
+                        <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC
+                            BY-NC 4.0</a>, code under MIT.</p>
                 </div>
+            </section>
 
-                <div class="download-placeholder-grid">
-                    <div class="download-placeholder-card card">
-                        <div class="placeholder-icon">📦</div>
-                        <h3>Download Method A</h3>
-                        <p class="placeholder-desc">Access method details to be announced.</p>
-                        <span class="coming-soon-badge">Coming Soon</span>
+            <!-- ============ TEAM ============ -->
+            <section class="block block-alt" id="team">
+                <div class="wrap">
+                    <h2 class="section-title" data-split>The team.</h2>
+                    <div class="team">
+                        <figure><a class="team-link" href="https://www.linkedin.com/in/roberto-leotta-b68571176/" target="_blank" rel="noopener" aria-label="Roberto Leotta on LinkedIn"><img src="assets/team/Rob.jpg" alt="Roberto Leotta" loading="lazy"><span class="team-in" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></span></a><figcaption><b>Roberto Leotta*</b><span>iCTLab s.r.l.</span></figcaption></figure>
+                        <figure><a class="team-link" href="https://www.linkedin.com/in/salvatore-alfio-sambataro/" target="_blank" rel="noopener" aria-label="Salvatore Alfio Sambataro on LinkedIn"><img src="assets/team/Salvatore.jpg" alt="Salvatore Alfio Sambataro" loading="lazy"><span class="team-in" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></span></a><figcaption><b>Salvatore A. Sambataro*</b><span>University of Catania</span></figcaption></figure>
+                        <figure><img src="assets/team/Claudio.jpg" alt="Claudio Vittorio Ragaglia" loading="lazy"><figcaption><b>Claudio V. Ragaglia</b><span>University of Catania</span></figcaption></figure>
+                        <figure><img src="assets/team/Mirko.jpg" alt="Mirko Casu" loading="lazy"><figcaption><b>Mirko Casu</b><span>University of Catania</span></figcaption></figure>
+                        <figure><a class="team-link" href="https://www.linkedin.com/in/yuri-petralia/" target="_blank" rel="noopener" aria-label="Yuri Petralia on LinkedIn"><img src="assets/team/Yuri.jpg" alt="Yuri Petralia" loading="lazy"><span class="team-in" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></span></a><figcaption><b>Yuri Petralia</b><span>iCTLab s.r.l.</span></figcaption></figure>
+                        <figure><img src="assets/team/Francesco.jpg" alt="Francesco Guarnera" loading="lazy"><figcaption><b>Francesco Guarnera</b><span>University of Catania</span></figcaption></figure>
+                        <figure><img src="assets/team/Luca.jpg" alt="Luca Guarnera" loading="lazy"><figcaption><b>Luca Guarnera</b><span>University of Catania</span></figcaption></figure>
+                        <figure><a class="team-link" href="https://www.linkedin.com/in/sebastianobattiato/" target="_blank" rel="noopener" aria-label="Sebastiano Battiato on LinkedIn"><img src="assets/team/Sebastiano.jpg" alt="Sebastiano Battiato" loading="lazy"><span class="team-in" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></span></a><figcaption><b>Sebastiano Battiato</b><span>University of Catania</span></figcaption></figure>
                     </div>
-                    <div class="download-placeholder-card card">
-                        <div class="placeholder-icon">🔗</div>
-                        <h3>Download Method B</h3>
-                        <p class="placeholder-desc">Access method details to be announced.</p>
-                        <span class="coming-soon-badge">Coming Soon</span>
-                    </div>
+                    <p class="fine">* Equal contribution</p>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- The Team -->
-        <section id="team" class="content-section reveal shadow-bg">
-            <div class="container-fluid">
-                <h2 class="section-title">The Team</h2>
-                <div class="team-grid">
-                    <div class="team-member">
-                        <img src="assets/Rob.png" alt="Roberto Leotta" class="member-photo">
-                        <h3>Roberto Leotta*</h3>
-                        <p>iCTLab s.r.l.</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="assets/Salvatore.png" alt="Salvatore A. Sambataro" class="member-photo">
-                        <h3>Salvatore A. Sambataro*</h3>
-                        <p>University of Catania</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="assets/Claudio.jpg" alt="Claudio V. Ragaglia" class="member-photo">
-                        <h3>Claudio V. Ragaglia</h3>
-                        <p>University of Catania</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="assets/Mirko.png" alt="Mirko Casu" class="member-photo">
-                        <h3>Mirko Casu</h3>
-                        <p>University of Catania</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="assets/Yuri.png" alt="Yuri Petralia" class="member-photo">
-                        <h3>Yuri Petralia</h3>
-                        <p>iCTLab s.r.l.</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="assets/Francesco.png" alt="Francesco Guarnera" class="member-photo">
-                        <h3>Francesco Guarnera</h3>
-                        <p>University of Catania</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="assets/Luca.png" alt="Luca Guarnera" class="member-photo">
-                        <h3>Luca Guarnera</h3>
-                        <p>University of Catania</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="assets/Sebastiano.png" alt="Sebastiano Battiato" class="member-photo">
-                        <h3>Sebastiano Battiato</h3>
-                        <p>University of Catania</p>
-                    </div>
-                </div>
-                <p class="team-note">* Equal contribution</p>
-            </div>
-        </section>
-
-        <!-- Citation -->
-        <section id="citation" class="content-section reveal">
-            <div class="container-fluid">
-                <h2 class="section-title">Citation</h2>
-                <div class="citation-container card">
-                    <pre><code>@misc{leotta2026synthforensicsmultigeneratorbenchmarkdetecting,
-      title={SynthForensics: A Multi-Generator Benchmark for Detecting Synthetic Video Deepfakes},
-      author={Roberto Leotta and Salvatore Alfio Sambataro and Claudio Vittorio Ragaglia and Mirko Casu and Yuri Petralia and Francesco Guarnera and Luca Guarnera and Sebastiano Battiato},
-      year={2026},
-      eprint={2602.04939},
-      archivePrefix={arXiv},
-      primaryClass={cs.CR},
-      url={https://arxiv.org/abs/2602.04939},
+            <!-- ============ CITATION ============ -->
+            <section class="block" id="citation">
+                <div class="wrap">
+                    <h2 class="section-title" data-split>Cite.</h2>
+                    <div class="code-card">
+                        <div class="code-head"><span>BibTeX</span><button class="copy"
+                                data-copy="#bib-code">Copy</button></div>
+<pre><code id="bib-code">@misc{leotta2026synthforensicsbenchmarkingevaluatingpeoplecentric,
+  title         = {SynthForensics: Benchmarking and Evaluating People-Centric Synthetic Video Deepfakes},
+  author        = {Roberto Leotta and Salvatore Alfio Sambataro and Claudio Vittorio Ragaglia and
+                   Mirko Casu and Yuri Petralia and Francesco Guarnera and Luca Guarnera and
+                   Sebastiano Battiato},
+  year          = {2026},
+  eprint        = {2602.04939},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2602.04939}
 }</code></pre>
-                    <button class="copy-btn">Copy BibTeX</button>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <footer class="main-footer">
-            <p>&copy; 2026 SynthForensics — CC BY-NC 4.0 (Dataset) · MIT License (Code). Contact:
-                roberto.leotta@ictlab.srl</p>
-        </footer>
+            <footer class="footer">
+                <p>© 2026 SynthForensics · Dataset CC BY-NC 4.0 · Code MIT</p>
+                <p>Contact: <a href="mailto:roberto.leotta@ictlab.srl">roberto.leotta@ictlab.srl</a></p>
+            </footer>
+        </div>
     </main>
 
-    <script src="js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>
