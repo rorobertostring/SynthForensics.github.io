@@ -1,0 +1,12 @@
+# internal notes, not for the public site
+WORK_LOG.md
+
+# operating system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# local archive (old page and unused assets), never published
+_archive/
