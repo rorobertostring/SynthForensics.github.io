@@ -267,6 +267,19 @@ button {
     transition: color .25s ease;
 }
 
+.sidebar-links .is-soon {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--dim);
+}
+
+.sidebar-links .is-soon small {
+    margin-left: 2px;
+    padding: 1px 6px;
+    font-size: 9px;
+}
+
 .sidebar-links .btn-emoji {
     font-size: 14px;
 }
@@ -568,6 +581,39 @@ button {
 
 .btn:hover {
     transform: translateY(-2px);
+}
+
+/* the code repository is not public yet: shown, but not a link */
+.is-soon {
+    cursor: default;
+}
+
+.is-soon small {
+    margin-left: 8px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: .85;
+}
+
+.btn.is-soon {
+    opacity: .62;
+}
+
+.btn.is-soon:hover {
+    transform: none;
+    background: rgba(255, 255, 255, .12);
+    border-color: rgba(255, 255, 255, .45);
+}
+
+.brandlink.is-soon {
+    opacity: .5;
 }
 
 .btn:has(.btn-emoji, .btn-ico) {
