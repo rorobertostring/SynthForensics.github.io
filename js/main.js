@@ -10,6 +10,19 @@
     const SIDEBAR = 280;
     const isDesktop = () => innerWidth >= 1024;
     const cssVar = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+    const touchOnly = matchMedia('(hover: none)').matches;
+
+    // Phones resize the viewport whenever the address bar slides in or out during a scroll. Re-measuring
+    // the layout and the scroll animations on those height-only changes made them jump mid-scroll, so the
+    // layout code listens to 'sf:resize', which only fires for real resizes (width, rotation, big changes).
+    let vpW = innerWidth, vpH = innerHeight;
+    addEventListener('load', () => { vpW = innerWidth; vpH = innerHeight; });   // the settled viewport
+    addEventListener('resize', () => {
+        if (touchOnly && innerWidth === vpW && Math.abs(innerHeight - vpH) < 160) return;
+        vpW = innerWidth;
+        vpH = innerHeight;
+        dispatchEvent(new Event('sf:resize'));
+    });
 
     /* ------------------------------------------------------------------
        Video wall grid (10 x 5 tiles, matching the 4K mosaic)
@@ -97,7 +110,7 @@
         pWrap.style.height = STAGE_H * k + 'px';
     }
     fitProtocolStage();
-    addEventListener('resize', fitProtocolStage);
+    addEventListener('sf:resize', fitProtocolStage);
     addEventListener('load', fitProtocolStage);   // the first pass can run before layout settles
 
     /* ------------------------------------------------------------------
@@ -274,7 +287,7 @@
     }));
     renderChart('zs', false);
     requestAnimationFrame(moveSegPill);
-    addEventListener('resize', moveSegPill);
+    addEventListener('sf:resize', moveSegPill);
 
     /* ------------------------------------------------------------------
        Realism: face quality (bars) and landmark completeness (lines).
@@ -462,14 +475,14 @@
     }
     renderLandmarks();
     let lmW = lmEl ? lmEl.clientWidth : 0;
-    addEventListener('resize', () => {
+    addEventListener('sf:resize', () => {
         if (!lmEl || lmEl.clientWidth === lmW) return;
         lmW = lmEl.clientWidth;
         renderLandmarks();
     });
 
     drawValidLoop();
-    addEventListener('resize', drawValidLoop);
+    addEventListener('sf:resize', drawValidLoop);
     addEventListener('load', drawValidLoop);
     if (document.fonts) document.fonts.ready.then(drawValidLoop);
 
@@ -531,6 +544,12 @@
 
     root.classList.add('js-ready');
     gsap.registerPlugin(ScrollTrigger);
+    // refresh on real resizes only ('sf:resize' below), never because the address bar moved
+    ScrollTrigger.config({ ignoreMobileResize: true, autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load' });
+    // On phones the address bar slides away as soon as a scroll starts and the viewport grows under the
+    // pinned hero: that is the jolt before the zoom. Letting ScrollTrigger drive touch scrolling keeps the
+    // bar in place and the pinned scenes in step with the finger.
+    if (ScrollTrigger.isTouch === 1) ScrollTrigger.normalizeScroll({ type: 'touch' });
 
     /* Smooth scrolling */
     let lenis = null;
@@ -568,13 +587,22 @@
 
     const geo = { from: {}, to: {}, zoom: {} };
 
+    // where the title rests in the hero (the scroll animation moves the hero copy up: measure it at rest)
+    function measureFrom() {
+        const copy = $('.hero-copy');
+        const copyT = copy.style.transform;
+        copy.style.transform = 'none';
+        const st = stage.getBoundingClientRect();
+        const hr = heroSlot.getBoundingClientRect();
+        copy.style.transform = copyT;
+        geo.from = { x: hr.left - st.left, y: hr.top - st.top };
+    }
+
     function measure() {
         // Brand: hero slot -> sidebar (or top bar) slot
         const hs = getComputedStyle(heroSlot);
         brand.style.fontSize = hs.fontSize;
-        const st = stage.getBoundingClientRect();
-        const hr = heroSlot.getBoundingClientRect();
-        geo.from = { x: hr.left - st.left, y: hr.top - st.top };
+        measureFrom();
 
         const target = isDesktop() ? sideSlot : mobileSlot;
         const holder = isDesktop() ? sidebar : topbar;
@@ -621,6 +649,9 @@
        into one face, the claim is revealed
        ------------------------------------------------------------------ */
     const shade = $('.hero-shade');
+    const brandFly = gsap.fromTo(brand,
+        { x: () => geo.from.x, y: () => geo.from.y, scale: 1 },
+        { x: () => geo.to.x, y: () => geo.to.y, scale: () => geo.to.s, duration: 0.4, ease: 'power3.inOut', immediateRender: false });
     const heroTl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
@@ -633,9 +664,17 @@
             invalidateOnRefresh: true,
             onRefreshInit: measure,
             onRefresh(self) {
+                // measure again now that the pin has its new size: while the hero is pinned, the first
+                // pass still sees it at its old height and would park the title too high on the way back
+                // (only the title's flight depends on it, so only that tween is re-read)
+                measure();
+                brandFly.invalidate();
+                heroTl.render(heroTl.totalTime(), true, true);
                 if (self.progress === 0) gsap.set(brand, { x: geo.from.x, y: geo.from.y, scale: 1 });
             },
             onUpdate(self) {
+                // colour and shadow change once, by class (a CSS transition), not on every frame
+                brand.classList.toggle('is-docked', self.progress > 0.24);
                 wall.classList.toggle('is-zooming', self.progress > 0.04);
                 targetCell.classList.toggle('is-locked', self.progress > 0.52);
             },
@@ -644,26 +683,36 @@
         }
     });
 
+    // Whenever the hero is back at its very start, put the title exactly on its slot as laid out at
+    // that moment, so it can never end up over the NeurIPS badge, whatever moved in between.
+    let brandHome = true;
+    heroTl.eventCallback('onUpdate', () => {
+        const home = heroTl.progress() < 0.0005;
+        if (home && !brandHome) {
+            measureFrom();
+            brandFly.invalidate();
+            gsap.set(brand, { x: geo.from.x, y: geo.from.y, scale: 1 });
+        }
+        brandHome = home;
+    });
+    // web fonts change the hero's line breaks: measure again once they are in
+    if (document.fonts) document.fonts.ready.then(() => ScrollTrigger.refresh());
+
     heroTl
         // (the intro animates the children; the scroll fades their container, so the two never fight)
         .to('.hero-copy', { autoAlpha: 0, y: -50, duration: 0.18, ease: 'power2.in' }, 0)
         .to('.scroll-cue', { autoAlpha: 0, duration: 0.1 }, 0)
-        .fromTo(brand,
-            { x: () => geo.from.x, y: () => geo.from.y, scale: 1, color: '#ffffff', textShadow: '0 6px 30px rgba(0,0,0,.35)' },
-            {
-                x: () => geo.to.x, y: () => geo.to.y, scale: () => geo.to.s, color: () => cssVar('--text'),
-                textShadow: '0 0px 0px rgba(0,0,0,0)', duration: 0.4, ease: 'power3.inOut', immediateRender: false
-            }, 0)
+        .add(brandFly, 0)
         .fromTo(isDesktop() ? sidebar : topbar,
             isDesktop() ? { xPercent: -100 } : { yPercent: -100 },
             isDesktop() ? { xPercent: 0, duration: 0.26, ease: 'power3.out' } : { yPercent: 0, duration: 0.26, ease: 'power3.out' },
             0.2)
         .fromTo('.sidenav li', { x: -24, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.16, stagger: 0.012, ease: 'power2.out' }, 0.3)
         .to(wall, { x: () => geo.zoom.x, y: () => geo.zoom.y, scale: () => geo.zoom.s, duration: 0.62, ease: 'power2.inOut' }, 0.04)
-        .to(grid, { '--dim': 0.86, duration: 0.3 }, 0.26)
+        .to('.wall-dim', { opacity: 0.86, duration: 0.3 }, 0.26)
         .to(shade, { opacity: 0.45, duration: 0.3 }, 0.1)
-        .fromTo('.reveal-big span', { autoAlpha: 0, y: 60, filter: 'blur(12px)' },
-            { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.12, stagger: 0.035, ease: 'power3.out' }, 0.62)
+        .fromTo('.reveal-big span', { autoAlpha: 0, y: 60, ...(touchOnly ? {} : { filter: 'blur(12px)' }) },
+            { autoAlpha: 1, y: 0, ...(touchOnly ? {} : { filter: 'blur(0px)' }), duration: 0.12, stagger: 0.035, ease: 'power3.out' }, 0.62)
         .fromTo('.reveal-small', { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.78)
         .to({}, { duration: 0.14 });
 
@@ -1034,7 +1083,7 @@
         }
     });
     zRender();
-    addEventListener('resize', () => { zMeasure(); zRender(); });
+    addEventListener('sf:resize', () => { zMeasure(); zRender(); });
     zSteps.forEach((btn) => btn.addEventListener('click', () => {
         const n = +btn.dataset.step;
         const p = n === 0 ? 0 : (n - 1 + 0.82) / Z_M;
@@ -1130,12 +1179,12 @@
         if (cur !== navCur) { navCur = cur; setActive(cur); }
     };
     addEventListener('scroll', pickSection, { passive: true });
-    addEventListener('resize', pickSection);
+    addEventListener('sf:resize', pickSection);
     pickSection();
 
     addEventListener('load', () => ScrollTrigger.refresh());
     let rz;
-    addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => ScrollTrigger.refresh(), 150); });
+    addEventListener('sf:resize', () => { clearTimeout(rz); rz = setTimeout(() => ScrollTrigger.refresh(), 150); });
 
     /* ------------------------------------------------------------------ */
     function initSideNavStatic() {

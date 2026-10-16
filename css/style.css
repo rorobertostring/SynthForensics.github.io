@@ -139,6 +139,13 @@ button {
     white-space: nowrap;
     will-change: transform;
     text-shadow: 0 6px 30px rgba(0, 0, 0, .35);
+    transition: color .45s ease, text-shadow .45s ease;
+}
+
+/* docked in the sidebar or the top bar: theme colour, no shadow (switched once, not per frame) */
+.brand.is-docked {
+    color: var(--text);
+    text-shadow: none;
 }
 
 .brand .ch {
@@ -381,7 +388,6 @@ button {
 }
 
 .wall-grid {
-    --dim: 0;
     position: absolute;
     inset: 0;
     display: grid;
@@ -391,13 +397,27 @@ button {
 
 .cell {
     position: relative;
-    background: rgba(0, 0, 0, var(--dim));
-    transition: background-color .3s ease;
 }
 
-.cell.is-target {
-    background: transparent;
+/* while zooming, everything but the target tile is dimmed: one layer whose opacity is animated
+   (the target tile at row 2, column 5 of the 10 x 5 wall is left open) */
+.wall-dim {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity;
 }
+
+.wall-dim i {
+    position: absolute;
+    background: #000;
+}
+
+.wall-dim i:nth-child(1) { left: 0; top: 0; width: 100%; height: 40%; }
+.wall-dim i:nth-child(2) { left: 0; top: 60%; width: 100%; height: 40%; }
+.wall-dim i:nth-child(3) { left: 0; top: 39.9%; width: 50%; height: 20.2%; }
+.wall-dim i:nth-child(4) { left: 60%; top: 39.9%; width: 40%; height: 20.2%; }
 
 .cell .cover {
     position: absolute;
