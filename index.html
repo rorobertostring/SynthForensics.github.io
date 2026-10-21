@@ -106,8 +106,10 @@
         <section class="hero" id="overview" aria-label="Overview">
             <div class="hero-stage">
                 <div class="wall" aria-hidden="true">
-                    <video class="wall-video" src="assets/50VIDS_loop.mp4" poster="assets/wall_poster.jpg" autoplay muted
-                        loop playsinline></video>
+                    <video class="wall-video" poster="assets/wall_poster.jpg" autoplay muted loop playsinline>
+                        <source src="assets/50VIDS_loop_1080.mp4" type="video/mp4" media="(max-width: 1023px)">
+                        <source src="assets/50VIDS_loop.mp4" type="video/mp4">
+                    </video>
                     <div class="wall-grid"></div>
                     <div class="wall-dim" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
                 </div>

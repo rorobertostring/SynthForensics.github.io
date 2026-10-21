@@ -865,7 +865,11 @@
     const Z_D = 1400;                  // distance between two steps on the z axis
     const ZP = 1000;                   // CSS perspective of the scene
     const Z_M = zStages.length - 1;    // segments travelled
+    // Touch devices get a lighter scene, easier on older phones: no depth blur on the steps,
+    // fewer particles and frames. Set it to false to give them the full scene again.
+    const Z_LITE = touchOnly;
     zSection.classList.add('z-anim');
+    zSection.classList.toggle('z-lite', Z_LITE);
 
     // stagger index for the in-step animations
     $$('.z-fields, .z-cats, .z-gens, .z-crit, .z-v-versions').forEach((list) =>
@@ -884,27 +888,28 @@
         zBits.push(b);
         return b;
     };
-    for (let k = 0; k < 80; k++) {
+    for (let k = 0; k < (Z_LITE ? 32 : 80); k++) {
         const kind = k % 3 === 0 ? 'dot' : 'sq';
         const a = rand() * Math.PI * 2, r = 0.4 + rand() * 0.6;
         const b = addBit(kind, Math.cos(a) * r, Math.sin(a) * r * 0.75, -Z_D * 0.8 + rand() * Z_D * (Z_M + 1.6), kind === 'dot' ? 0.9 : 0.7);
         b.size = kind === 'sq' ? 8 + rand() * 18 : 4;
         if (kind === 'sq') b.el.style.setProperty('--s', b.size + 'px');
     }
-    // video frames: five per step, the same size, placed just behind the step (each at its own depth,
-    // for a little parallax) so they surround it and then fly past with it. Each one gets a direction
-    // around the step - five sectors, with a seeded rotation and jitter - and zMeasure() parks it just
-    // outside the step's content in that direction.
+    // video frames: five per step (three in the lite scene), the same size, placed just behind the step
+    // (each at its own depth, for a little parallax) so they surround it and then fly past with it. Each
+    // one gets a direction around the step - one sector each, with a seeded rotation and jitter - and
+    // zMeasure() parks it just outside the step's content in that direction.
     const THUMBS = ['t_wan', 't_sky', 't_self', 't_cog', 't_magi', 't_ltx', 't_davinci', 't_helios', 'd_wan', 'd_self', 'd_sky', 'd_magi', 'd_cog'];
     const zFrames = [];
+    const Z_PER = Z_LITE ? 3 : 5;
     for (let i = 0, j = 0; i <= Z_M; i++) {
         const base = rand() * Math.PI * 2;
-        for (let k = 0; k < 5; k++) {
+        for (let k = 0; k < Z_PER; k++) {
             const b = addBit('img', 0, 0, 0, 0.8);
             b.el.innerHTML = `<img src="assets/frames/${THUMBS[j++ % THUMBS.length]}.jpg" alt="" loading="lazy">`;
             b.dz = 70 + rand() * 150;
             b.z = i * Z_D + b.dz;
-            Object.assign(b, { step: i, ang: base + k * (Math.PI * 2 / 5) + (rand() - 0.5) * 0.7, extra: rand() * 60 });
+            Object.assign(b, { step: i, ang: base + k * (Math.PI * 2 / Z_PER) + (rand() - 0.5) * 0.7, extra: rand() * 60 });
             zFrames.push(b);
         }
     }
@@ -945,7 +950,10 @@
         const oy = H * 0.46, cy = H * 0.47, gap = 26;
         const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
         const taken = [];   // per step: the frames already parked
+        // narrow and short screens hide the frames in CSS: then zRender() leaves them alone
+        const framesShown = !zFrames.length || getComputedStyle(zFrames[0].el).display !== 'none';
         zFrames.forEach((b) => {
+            if (!framesShown) { b.off = true; return; }
             const sc = ZP / (ZP + b.dz), fw = zImgW * sc, fh = zImgW * 0.625 * sc;
             const el = zStages[b.step];
             const cw = el._cw * el._k, ch = el._ch * el._k;
@@ -1018,6 +1026,11 @@
         qcReset = start;
     }
 
+    // write a style only when its value changes: most of them stay the same from one frame to the next
+    const setStyle = (el, prop, v) => { if (el['_' + prop] !== v) { el['_' + prop] = v; el.style[prop] = v; } };
+    // stacking order in coarse z bands, so it changes a few times per step instead of on every frame
+    const zIndexAt = (z) => String(2000 + Math.round(z / 50));
+
     function zRender() {
         const s = zToS(zState.p);
         const W = zScene.clientWidth, H = zScene.clientHeight;
@@ -1027,13 +1040,13 @@
             if (z < 0) { const far = -z / Z_D; o = 1 - far * 0.9; blur = Math.min(12, far * 7); }
             else { const n = z / 520; o = 1 - n; blur = n * 9; }
             o = Math.max(0, Math.min(1, o));
-            if (o < 0.01) { el.style.visibility = 'hidden'; return; }
-            el.style.visibility = 'visible';
-            el.style.opacity = o.toFixed(3);
-            el.style.filter = blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : 'none';
-            el.style.transform = `translate(-50%, -50%) translate3d(0, 0, ${z.toFixed(1)}px) scale(${(el._k || 1).toFixed(3)})`;
-            el.style.zIndex = String(2000 + Math.round(z / 5));
-            el.style.pointerEvents = Math.abs(z) < Z_D * 0.25 ? 'auto' : 'none';
+            if (o < 0.01) { setStyle(el, 'visibility', 'hidden'); return; }
+            setStyle(el, 'visibility', 'visible');
+            setStyle(el, 'opacity', o.toFixed(3));
+            setStyle(el, 'filter', !Z_LITE && blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : 'none');
+            setStyle(el, 'transform', `translate(-50%, -50%) translate3d(0, 0, ${z.toFixed(1)}px) scale(${(el._k || 1).toFixed(3)})`);
+            setStyle(el, 'zIndex', zIndexAt(z));
+            setStyle(el, 'pointerEvents', Math.abs(z) < Z_D * 0.25 ? 'auto' : 'none');
         });
         // on-screen boxes of the steps in view (perspective 1000px, origin at 50% 46%)
         const P = ZP, oy = H * 0.46;
@@ -1048,17 +1061,17 @@
             const z = s * Z_D - b.z;
             let o = z < 0 ? 1 + z / (2.4 * Z_D) : 1 - z / 640;
             o = Math.max(0, Math.min(1, o)) * b.base;
-            if (o < 0.01 || z > 900 || b.off) { b.el.style.visibility = 'hidden'; return; }
+            if (o < 0.01 || z > 900 || b.off) { setStyle(b.el, 'visibility', 'hidden'); return; }
             const x = b.kind === 'img' ? b.px : b.ax * W * 0.55, y = b.kind === 'img' ? b.py : b.ay * H * 0.55;
             // anything that would sit behind a step's text or diagram fades out until it is clear of it
             const sc = P / (P - z);
             const fx = W / 2 + x * sc, fy = oy + (H * 0.47 + y - oy) * sc;
             const hw = (b.kind === 'img' ? zImgW : b.size) * sc / 2, hh = (b.kind === 'img' ? zImgW * 0.625 : b.size) * sc / 2;
             if (keepOut.some(([cx, cy, rw, rh]) => Math.abs(fx - cx) < hw + rw && Math.abs(fy - cy) < hh + rh)) o = 0;
-            b.el.style.visibility = 'visible';
-            b.el.style.opacity = o.toFixed(3);
-            b.el.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px)`;
-            b.el.style.zIndex = String(2000 + Math.round(z / 5));
+            setStyle(b.el, 'visibility', 'visible');
+            setStyle(b.el, 'opacity', o.toFixed(3));
+            setStyle(b.el, 'transform', `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px)`);
+            setStyle(b.el, 'zIndex', zIndexAt(z));
         });
         if (qcTl && Math.abs(s - qcStep) > 0.95 && qc.dataset.phase !== 'try1') { qcTl.pause(); qcReset(); }
         // step in focus: settle its inner animations, update the progress bar

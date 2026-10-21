@@ -1544,6 +1544,11 @@ button {
     will-change: transform, opacity, filter;
 }
 
+/* lite scene on touch devices (Z_LITE in main.js): the steps are not blurred */
+.z-lite .z-stage {
+    will-change: transform, opacity;
+}
+
 .z-bit {
     display: none;
 }
@@ -4559,6 +4564,40 @@ a.brandlink:hover .bl-arrow {
 .static-mode .p-steps li {
     display: flex;
     opacity: 1;
+}
+
+/* Touch devices: no backdrop blur. Blurring whatever moves underneath again on every frame is heavy
+   for older phones; slightly more opaque fills keep the same look. */
+@media (hover: none) {
+    .topbar,
+    .btn-glass,
+    .z-anim .z-progress,
+    .qc-try,
+    .qc-artifact {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    .topbar {
+        background: color-mix(in srgb, var(--bg) 95%, transparent);
+    }
+
+    .btn-glass {
+        background: rgba(255, 255, 255, .18);
+    }
+
+    .z-anim .z-progress {
+        background: color-mix(in srgb, var(--bg) 94%, transparent);
+    }
+
+    .qc-try {
+        background: rgba(0, 0, 0, .78);
+    }
+
+    /* the defect stays readable as a tinted patch inside its dashed outline */
+    .qc-artifact {
+        background: rgba(255, 107, 111, .18);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
