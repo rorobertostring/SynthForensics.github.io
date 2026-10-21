@@ -65,15 +65,17 @@
        ------------------------------------------------------------------ */
     const menuBtn = $('.menu-btn');
     const mobileMenu = $('#mobile-menu');
-    const closeMenu = () => {
-        menuBtn?.setAttribute('aria-expanded', 'false');
-        if (mobileMenu) mobileMenu.hidden = true;
-    };
-    menuBtn?.addEventListener('click', () => {
-        const open = menuBtn.getAttribute('aria-expanded') !== 'true';
+    const setMenu = (open) => {
+        if (!mobileMenu || mobileMenu.hidden === !open) return;
         menuBtn.setAttribute('aria-expanded', String(open));
         mobileMenu.hidden = !open;
-    });
+        if (open) mobileMenu.scrollTop = 0;
+        dispatchEvent(new CustomEvent('sf:menu', { detail: open }));
+    };
+    const closeMenu = () => setMenu(false);
+    menuBtn?.addEventListener('click', () => setMenu(mobileMenu.hidden));
+    // the menu only exists below the desktop breakpoint: close it if the screen grows past it
+    addEventListener('sf:resize', () => { if (isDesktop()) closeMenu(); });
 
     /* ------------------------------------------------------------------
        Copy buttons
@@ -549,7 +551,8 @@
     // On phones the address bar slides away as soon as a scroll starts and the viewport grows under the
     // pinned hero: that is the jolt before the zoom. Letting ScrollTrigger drive touch scrolling keeps the
     // bar in place and the pinned scenes in step with the finger.
-    if (ScrollTrigger.isTouch === 1) ScrollTrigger.normalizeScroll({ type: 'touch' });
+    const normalizeTouch = ScrollTrigger.isTouch === 1;
+    if (normalizeTouch) ScrollTrigger.normalizeScroll({ type: 'touch' });
 
     /* Smooth scrolling */
     let lenis = null;
@@ -560,6 +563,13 @@
         gsap.ticker.lagSmoothing(0);
         window.sfLenis = lenis;
     }
+
+    // The touch normalizer takes every swipe for the page, so the open mobile menu could not scroll:
+    // while it is open the swipes go to the menu (data-lenis-prevent) and the page behind stays still.
+    addEventListener('sf:menu', ({ detail: open }) => {
+        if (normalizeTouch) ScrollTrigger.normalizeScroll(open ? false : { type: 'touch' });
+        if (lenis) open ? lenis.stop() : lenis.start();
+    });
 
     $$('a[href^="#"]').forEach((a) => {
         a.addEventListener('click', (e) => {

@@ -4319,6 +4319,7 @@ a.brandlink:hover .bl-arrow {
         padding: 24px 24px 40px;
         background: var(--bg);
         overflow-y: auto;
+        overscroll-behavior: contain;
     }
 
     .mobile-menu[hidden] {
