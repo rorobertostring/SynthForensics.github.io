@@ -548,26 +548,21 @@
     gsap.registerPlugin(ScrollTrigger);
     // refresh on real resizes only ('sf:resize' below), never because the address bar moved
     ScrollTrigger.config({ ignoreMobileResize: true, autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load' });
-    // On phones the address bar slides away as soon as a scroll starts and the viewport grows under the
-    // pinned hero: that is the jolt before the zoom. Letting ScrollTrigger drive touch scrolling keeps the
-    // bar in place and the pinned scenes in step with the finger.
-    const normalizeTouch = ScrollTrigger.isTouch === 1;
-    if (normalizeTouch) ScrollTrigger.normalizeScroll({ type: 'touch' });
-
     /* Smooth scrolling */
+    // Touch scrolling goes through Lenis too (syncTouch), frame by frame and with the same glide as the
+    // wheel once the finger lifts. It also keeps the phone's address bar in place: when it slid away, the
+    // viewport grew under the pinned hero and the scene jolted before the zoom.
     let lenis = null;
     if (window.Lenis) {
-        lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1 });
+        lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, syncTouch: true, touchInertiaExponent: 2 });
         lenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((t) => lenis.raf(t * 1000));
         gsap.ticker.lagSmoothing(0);
         window.sfLenis = lenis;
     }
 
-    // The touch normalizer takes every swipe for the page, so the open mobile menu could not scroll:
-    // while it is open the swipes go to the menu (data-lenis-prevent) and the page behind stays still.
+    // While the mobile menu is open the swipes go to the menu (data-lenis-prevent) and the page behind stays still.
     addEventListener('sf:menu', ({ detail: open }) => {
-        if (normalizeTouch) ScrollTrigger.normalizeScroll(open ? false : { type: 'touch' });
         if (lenis) open ? lenis.stop() : lenis.start();
     });
 
