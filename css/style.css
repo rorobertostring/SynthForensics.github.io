@@ -4373,18 +4373,26 @@ a.brandlink:hover .bl-arrow {
         padding: 76px 0 24px;
     }
 
+    /* one step at a time: all four share one cell (as tall as the longest, so nothing below moves)
+       and cross-fade, the old one quickly out, the new one in just after */
     .p-steps {
+        display: grid;
         margin-top: 16px;
     }
 
     .p-steps li {
-        display: none;
+        grid-area: 1 / 1;
         border-top: 0;
         padding: 0;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity .2s ease, transform .2s ease;
     }
 
     .p-steps li.is-active {
-        display: flex;
+        opacity: 1;
+        transform: none;
+        transition: opacity .4s ease .15s, transform .4s var(--ease-out) .15s;
     }
 
     .realism-nums,
@@ -4563,7 +4571,9 @@ a.brandlink:hover .bl-arrow {
 
 .static-mode .p-steps li {
     display: flex;
+    grid-area: auto;
     opacity: 1;
+    transform: none;
 }
 
 /* Touch devices: no backdrop blur. Blurring whatever moves underneath again on every frame is heavy
