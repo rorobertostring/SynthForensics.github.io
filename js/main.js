@@ -783,13 +783,17 @@
         scrollTrigger: { trigger: '.abstract-text', start: 'top 78%', end: 'bottom 52%', scrub: 0.4 }
     });
 
-    // Counters
+    // Counters. The real value stays in the page until the counter is about to scroll into view (so it can
+    // be read without scrolling, by search engines too): it is zeroed just below the screen, then counts up.
     $$('[data-count]').forEach((el) => {
         const end = parseFloat(el.dataset.count);
         const dec = parseInt(el.dataset.decimals || '0', 10);
         const suffix = el.dataset.suffix || '';
         const obj = { v: 0 };
-        el.textContent = formatCount(0, dec) + suffix;
+        ScrollTrigger.create({
+            trigger: el, start: 'top bottom+=200', once: true,
+            onEnter: () => { el.textContent = formatCount(obj.v, dec) + suffix; }
+        });
         gsap.to(obj, {
             v: end, duration: 2, ease: 'expo.out',
             scrollTrigger: { trigger: el, start: 'top 90%' },
@@ -806,13 +810,15 @@
     if (fqEl) {
         const rows = $$('.fq-row', fqEl);
         const fqTl = gsap.timeline({ scrollTrigger: { trigger: fqEl, start: 'top 78%', once: true } });
+        // the values keep their real text until the chart plays (the rows are still hidden then)
+        fqTl.call(() => $$('.fq-val', fqEl).forEach((val) => { val.textContent = '0.000'; }), null, 0);
         rows.forEach((row, i) => {
             const val = $('.fq-val', row);
             const v = +val.dataset.v, o = { v: 0 }, d = 0.05 + i * 0.06;
             fqTl.fromTo(row, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, d)
                 .fromTo($('.fq-bar', row), { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: 'expo.out' }, d + 0.1)
                 .fromTo(val, { left: '0%' }, { left: (v / FQ_MAX) * 100 + '%', duration: 1.2, ease: 'expo.out' }, d + 0.1)
-                .fromTo(o, { v: 0 }, { v, duration: 1.2, ease: 'expo.out', onUpdate: () => { val.textContent = o.v.toFixed(3); } }, d + 0.1);
+                .fromTo(o, { v: 0 }, { v, duration: 1.2, ease: 'expo.out', immediateRender: false, onUpdate: () => { val.textContent = o.v.toFixed(3); } }, d + 0.1);
         });
         // then the real-video range opens up, the rest steps back and SynthForensics lights up inside it
         const T = 0.05 + rows.length * 0.06 + 0.6;
@@ -969,8 +975,12 @@
     }
     zMeasure();
 
-    // counters show 0 until their step first comes into focus, then count up once
-    $$('.z-count').forEach((c) => { c.textContent = '0'; });
+    // counters show 0 until their step first comes into focus, then count up once; the real values stay
+    // in the page until the pipeline is about to scroll into view, as for the other counters
+    ScrollTrigger.create({
+        trigger: zSection, start: 'top bottom+=200', once: true,
+        onEnter: () => $$('.z-count').forEach((c) => { if (!c.dataset.done) c.textContent = '0'; })
+    });
     function zCount(stage) {
         $$('.z-count', stage).forEach((c) => {
             if (c.dataset.done) return;
